@@ -66,31 +66,31 @@ def create_snowflake(suffix: int) -> int:
 
 class SnowflakeEnum(Enum):
 	"""Enum Types"""
-	user 			= 0
-	servers 		= 1
-	categories		= 2
+	user 				= 0
+	servers 			= 1
+	categories			= 2
 	text_channels		= 3
 	voice_channels		= 4
-	roles 			= 5
-	gcs 			= 6
-	dms			= 7
-	relations		= 8
-	member 			= 9
-	messages 		= 10
-	emojis 			= 11
-	reactions		= 12
+	roles 				= 5
+	gcs 				= 6
+	dms					= 7
+	relations			= 8
+	member 				= 9
+	messages 			= 10
+	emojis 				= 11
+	reactions			= 12
 
-user_snowflake 			= create_snowflake(SnowflakeEnum.user.value)
-server_snowflake 		= create_snowflake(SnowflakeEnum.servers.value)
-category_snowflake 		= create_snowflake(SnowflakeEnum.categories.value)
+user_snowflake 				= create_snowflake(SnowflakeEnum.user.value)
+server_snowflake 			= create_snowflake(SnowflakeEnum.servers.value)
+category_snowflake 			= create_snowflake(SnowflakeEnum.categories.value)
 text_channel_snowflake 		= create_snowflake(SnowflakeEnum.text_channels.value)
 voice_channel_snowflake 	= create_snowflake(SnowflakeEnum.voice_channels.value)
-roles_snowflake 		= create_snowflake(SnowflakeEnum.roles.value)
-gcs_snowflake 			= create_snowflake(SnowflakeEnum.gcs.value)
-dms_snowflake 			= create_snowflake(SnowflakeEnum.dms.value)
+roles_snowflake 			= create_snowflake(SnowflakeEnum.roles.value)
+gcs_snowflake 				= create_snowflake(SnowflakeEnum.gcs.value)
+dms_snowflake 				= create_snowflake(SnowflakeEnum.dms.value)
 relations_snowflake 		= create_snowflake(SnowflakeEnum.relations.value)
-member_snowflake 		= create_snowflake(SnowflakeEnum.member.value)
-message_snowflake 		= create_snowflake(SnowflakeEnum.messages.value)
-emoji_snowflake 		= create_snowflake(SnowflakeEnum.emojis.value)
+member_snowflake 			= create_snowflake(SnowflakeEnum.member.value)
+message_snowflake 			= create_snowflake(SnowflakeEnum.messages.value)
+emoji_snowflake 			= create_snowflake(SnowflakeEnum.emojis.value)
 reactions_snowflake 		= create_snowflake(SnowflakeEnum.reactions.value)
 
