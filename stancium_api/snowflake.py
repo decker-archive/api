@@ -66,19 +66,19 @@ def create_snowflake(suffix: int) -> int:
 
 class SnowflakeEnum(Enum):
 	"""Enum Types"""
-	user 				= 0
-	servers 			= 1
-	categories			= 2
-	text_channels		= 3
-	voice_channels		= 4
-	roles 				= 5
-	gcs 				= 6
-	dms					= 7
-	relations			= 8
-	member 				= 9
-	messages 			= 10
-	emojis 				= 11
-	reactions			= 12
+	user 					= 0
+	servers 				= 1
+	categories				= 2
+	text_channels			= 3
+	voice_channels			= 4
+	roles 					= 5
+	gcs 					= 6
+	dms						= 7
+	relations				= 8
+	member 					= 9
+	messages 				= 10
+	emojis 					= 11
+	reactions				= 12
 
 user_snowflake 				= create_snowflake(SnowflakeEnum.user.value)
 server_snowflake 			= create_snowflake(SnowflakeEnum.servers.value)
