@@ -66,7 +66,6 @@ def create_snowflake(suffix: int) -> int:
 
 class SnowflakeEnum(Enum):
 	"""Enum Types"""
-	animated_asset			= -2
 	asset 					= -1
 	user 					= 0
 	servers 				= 1
