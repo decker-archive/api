@@ -60,7 +60,7 @@ def create_snowflake(suffix: int) -> int:
 	if len(str(suffix)) > 2:
 		assert False, "Suffix must be 2 digits or shorter in length"
 	SEQUENCE.increment()
-	snowflake = round(time())*100000000+SEQUENCE*100+suffix
+	snowflake = round(time()*1000)*100000000+SEQUENCE*100+suffix
 	return snowflake
 
 id = create_snowflake(type)
