@@ -1,8 +1,4 @@
 """
-insert loicense
-
-------------------------------
-ADDITIONAL NOTE:
 You shouldn't have access to this if you're not a member of the dev team,"
 
 If you reached it however kudos to you, now spend the next 40 months tryna decrypt ONE
