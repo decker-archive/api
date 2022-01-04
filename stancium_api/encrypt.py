@@ -1,8 +1,8 @@
 """
-You shouldn't have access to this if you're not a member of the dev team,"
+You shouldn't have access to this if you're not a member of the dev team.
 
-If you reached it however kudos to you, now spend the next 40 months tryna decrypt ONE
-password from the database lmfao
+If you reached it however kudos to you, now spend the next 40 months tryna decrypt one
+password from the database.
 """
 from hashlib import sha256
 from random import randrange, choice
