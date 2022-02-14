@@ -1,2 +1,1 @@
-# these are made to be fast and simplistic, meaning any speedup possible is included.
-fastapi
+orjson

@@ -1,6 +1,5 @@
 import requests
 
+r = requests.get("http://localhost:8000/users/me", headers={'Authorization': 'bruh'})
 
-r = requests.get("http://127.0.0.1:8000/v1/users/@me", headers={"Authorization": ""})
-
-print(r.json())
+print(r.text)
