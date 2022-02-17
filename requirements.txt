@@ -1,5 +1,5 @@
 orjson
 snowflake-id
 sanic
-motor
+pymongo[srv]
 python-dotenv

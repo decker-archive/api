@@ -16,13 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 # utils for using motor, made to make development easier, and faster.
-import motor
-import motor.motor_asyncio
+import pymongo
 import dotenv
 import os
 
 dotenv.load_dotenv()
 
-db = motor.motor_asyncio.AsyncIOMotorClient(os.getenv('mongo_host'))
+client = pymongo.MongoClient(os.getenv('mongo_uri'))
 
+_users = client.get_database('users', read_preference=pymongo.ReadPreference.SECONDARY)
 
+users = _users.get_collection('core', read_preference=pymongo.ReadPreference.SECONDARY)
