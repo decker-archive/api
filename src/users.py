@@ -15,16 +15,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import orjson
 import sanic
-import logging
-from data_bodys import error_bodys
+from .data_bodys import error_bodys
 
 async def create_user(require: sanic.Request):
-
-    ...
+    d = require.load_json(loads=orjson.loads)
 
 async def get_me(require: sanic.Request):
-
     auth = require.headers.get('Authorization')
 
     ret = None

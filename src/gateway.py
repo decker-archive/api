@@ -15,17 +15,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import orjson
-import logging
 import sanic
-from events import events_to_dispatch
-from data_bodys import connected_clients, session_ids
+from .events import events_to_dispatch
+from .data_bodys import connected_clients, session_ids
 
 async def event_dispatcher(request: sanic.Request, ws):
     while True:
         if request.headers.get('Authorization') in connected_clients:
             for name, data in events_to_dispatch.items():
-                logging.debug('< %s', data)
                 await ws.send(data)
                 events_to_dispatch.pop(name)
 
