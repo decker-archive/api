@@ -17,19 +17,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from hashlib import sha256
 
-LETTERS = """
-qwertyuiopasdfghjklzxcvbnm
-QWERTYUIOPASDFGHJKLZXCVBNM
-1234567890
-@#$&_-()=%\"*':/!?+,.£€¥¢©®™~¿[]{}<>^¡`;÷\\|¦¬×§¶
-°あかさたなはまやらわいうおえくきこけすしそせつちとてのにぬねほひふへもみむめよ（ゆ）ろりれるわ
-・「」『』【】〔〕〒。‥…
-١٢٣٤٥٦٧٨٩٠  
-"""
-
 def get_hash_for(password: str):
     """Resolves the lowest amount of data-leak and/or password leak possible."""
     return sha256(password.encode()).hexdigest()
-
 
 print(get_hash_for('awdwada'))
