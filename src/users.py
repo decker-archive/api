@@ -32,6 +32,9 @@ async def create_user(require: sanic.Request):
 
     if len(d['separator']) != 4:
         return sanic.json(body=error_bodys['invalid_data'], status=400)
+    
+    if d['separator'] == 0000:
+        return sanic.json(body=error_bodys['invalid_data'], status=400)
 
     try:
         given = {
@@ -48,7 +51,9 @@ async def create_user(require: sanic.Request):
             'email': d['email'],
             'password': get_hash_for(d.pop('password')),
             'system': False,
-            'p': {'session_ids': [uuid.uuid4().__str__()]}
+            'session_ids': [
+                uuid.uuid4().__str__()
+            ]
         }
     except KeyError:
         return sanic.json(body=error_bodys['invalid_data'], status=400)
@@ -89,9 +94,21 @@ async def edit_user(require: sanic.Request):
 async def get_me(require: sanic.Request):
     auth = require.headers.get('Authorization')
     cur = None
-    for session_id in users.find({'p': {'session_ids'}}):
+    find = users.find_one({'session_ids': [auth]})
+    
+    for session_id in find['session_ids']:
         if session_id == require.headers.get('Authorization'):
-            cur = users.find({'p': {'session_ids': [auth]}})
+            cur = {
+            'id': find['id'],
+            'username': find['username'],
+            'separator': find['separator'],
+            'avatar_url': find['avatar_url'],
+            'banner_url': find['banner_url'],
+            'flags': find['flags'],
+            'uuid': find['uuid'],
+            'verified': find['verified'],
+            'system': find['system'],
+        }
     
     if cur is None:
         return sanic.json(body=error_bodys['no_auth'], status=401)
