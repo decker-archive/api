@@ -15,29 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import sanic
-from orjson import dumps
+import datetime
+import time
+from snowflake import SnowflakeGenerator
 
-app = sanic.Sanic('okemia', dumps=dumps)
-
-bodys = {
-    'no_auth': "You aren't supposed to be here! bezerk!"
-}
-
-@app.post('/users/create')
-async def create_user(require: sanic.Request):
-    ...
-
-@app.get('/users/me')
-async def get_me(require: sanic.Request):
-
-    auth = require.headers.get('Authorization')
-
-    ret = None
-    
-    if ret is None:
-        return sanic.json(body=bodys['no_auth'], status=401)
-    
-    return sanic.json(body=ret)
-
-app.run()
+def snowflake_with_blast(instance: int) -> int:
+    time.sleep(0.01)
+    return SnowflakeGenerator(instance=instance, epoch=int(1262304001), timestamp=datetime.datetime.now(datetime.timezone.utc).timestamp()).__next__()

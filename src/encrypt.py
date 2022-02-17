@@ -15,29 +15,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import sanic
-from orjson import dumps
+from hashlib import sha256
 
-app = sanic.Sanic('okemia', dumps=dumps)
+LETTERS = """
+qwertyuiopasdfghjklzxcvbnm
+QWERTYUIOPASDFGHJKLZXCVBNM
+1234567890
+@#$&_-()=%\"*':/!?+,.£€¥¢©®™~¿[]{}<>^¡`;÷\\|¦¬×§¶
+°あかさたなはまやらわいうおえくきこけすしそせつちとてのにぬねほひふへもみむめよ（ゆ）ろりれるわ
+・「」『』【】〔〕〒。‥…
+١٢٣٤٥٦٧٨٩٠  
+"""
 
-bodys = {
-    'no_auth': "You aren't supposed to be here! bezerk!"
-}
+def get_hash_for(password: str):
+    """Resolves the lowest amount of data-leak and/or password leak possible."""
+    return sha256(password.encode()).hexdigest()
 
-@app.post('/users/create')
-async def create_user(require: sanic.Request):
-    ...
 
-@app.get('/users/me')
-async def get_me(require: sanic.Request):
-
-    auth = require.headers.get('Authorization')
-
-    ret = None
-    
-    if ret is None:
-        return sanic.json(body=bodys['no_auth'], status=401)
-    
-    return sanic.json(body=ret)
-
-app.run()
+print(get_hash_for('awdwada'))
