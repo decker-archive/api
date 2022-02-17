@@ -19,7 +19,7 @@ import orjson
 import logging
 import sanic
 from events import events_to_dispatch
-from data_bodys import connected_clients
+from data_bodys import connected_clients, session_ids
 
 async def event_dispatcher(request: sanic.Request, ws):
     while True:
@@ -28,3 +28,9 @@ async def event_dispatcher(request: sanic.Request, ws):
                 logging.debug('< %s', data)
                 await ws.send(data)
                 events_to_dispatch.pop(name)
+
+async def connect(request: sanic.Request, ws):
+    d = ws.recv()
+    
+    if d['session_id'] in session_ids:
+        ...

@@ -21,3 +21,5 @@ error_bodys = {
 }
 
 connected_clients = []
+
+session_ids = []

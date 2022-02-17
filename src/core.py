@@ -17,13 +17,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import sanic
 from user_management import create_user, get_me
-from gateway import event_dispatcher
+from gateway import event_dispatcher, connect
 from orjson import dumps
 
 app = sanic.Sanic('okemia', dumps=dumps)
 
 app.add_route(create_user, '/users/create')
 app.add_route(get_me, '/users/me')
-app.add_websocket_route(event_dispatcher, '/')
+app.add_websocket_route(event_dispatcher, '/gateway/events')
+app.add_websocket_route(connect, '/gateway')
 
 app.run()
