@@ -16,14 +16,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import sanic
-from user_management import create_user, get_me
-from gateway import event_dispatcher
-from orjson import dumps
+import logging
+from data_bodys import error_bodys
 
-app = sanic.Sanic('okemia', dumps=dumps)
+async def create_user(require: sanic.Request):
 
-app.add_route(create_user, '/users/create')
-app.add_route(get_me, '/users/me')
-app.add_websocket_route(event_dispatcher, '/')
+    ...
 
-app.run()
+async def get_me(require: sanic.Request):
+
+    auth = require.headers.get('Authorization')
+
+    ret = None
+    
+    if ret is None:
+        return sanic.json(body=error_bodys['no_auth'], status=401)
+    
+    return sanic.json(body=ret)

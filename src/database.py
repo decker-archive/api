@@ -15,15 +15,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import sanic
-from user_management import create_user, get_me
-from gateway import event_dispatcher
-from orjson import dumps
+# utils for using motor, made to make development easier, and faster.
+import motor
+import motor.motor_asyncio
+import dotenv
+import os
 
-app = sanic.Sanic('okemia', dumps=dumps)
+dotenv.load_dotenv()
 
-app.add_route(create_user, '/users/create')
-app.add_route(get_me, '/users/me')
-app.add_websocket_route(event_dispatcher, '/')
+db = motor.motor_asyncio.AsyncIOMotorClient(os.getenv('mongo_host'))
 
-app.run()
+

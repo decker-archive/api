@@ -1,3 +1,5 @@
 orjson
 snowflake-id
 sanic
+motor
+python-dotenv
