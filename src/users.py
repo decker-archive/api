@@ -18,12 +18,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import json
 import orjson
 import sanic
-import uuid
 from .snowflakes import snowflake_with_blast
 from .data_bodys import error_bodys
 from .database import users
-from .encrypt import get_hash_for
+from .encrypt import get_hash_for, valid_session_id
+from .ratelimiting import ratelimiter
 
+@ratelimiter.limit('1/hour', key_func=valid_session_id)
 async def create_user(require: sanic.Request):
     d: dict = require.load_json(loads=orjson.loads)
 
@@ -46,13 +47,12 @@ async def create_user(require: sanic.Request):
             'flags': [
                 'Early Adopter'
             ],
-            'uuid': uuid.uuid4().__str__(),
             'verified': False,
             'email': d['email'],
             'password': get_hash_for(d.pop('password')),
             'system': False,
             'session_ids': [
-                uuid.uuid4().__str__()
+                snowflake_with_blast(7)
             ]
         }
     except KeyError:
@@ -62,9 +62,11 @@ async def create_user(require: sanic.Request):
         users.insert_one(given)
         return r
 
+@ratelimiter.limit('10/minute', key_func=valid_session_id)
 async def edit_user(require: sanic.Request):
+    auth = require.headers.get('Authorization')
     allow = False
-    for session_id in users.find({'p': {'session_ids'}}):
+    for session_id in users.find({'session_ids': [auth]}):
         if session_id == require.headers.get('Authorization'):
             allow = True
     
@@ -75,6 +77,8 @@ async def edit_user(require: sanic.Request):
 
     if d.get('separator'):
         if len(d['separator']) != 4:
+            return sanic.json(body=error_bodys['invalid_data'])
+        elif d['separator'] == 0000:
             return sanic.json(body=error_bodys['invalid_data'])
     
     given = {}
@@ -90,7 +94,13 @@ async def edit_user(require: sanic.Request):
     
     if d.get('password'):
         given['password'] = get_hash_for(d.pop('password'))
+    
+    if given == {}:
+        return sanic.json(body=error_bodys['invalid_data'])
+    
+    users.find_one_and_update()
 
+@ratelimiter.limit('100/minute', key_func=valid_session_id)
 async def get_me(require: sanic.Request):
     auth = require.headers.get('Authorization')
     cur = None

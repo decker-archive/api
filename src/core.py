@@ -16,16 +16,26 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import sanic
+from .ratelimiting import ratelimiter
+from .servers import channels
 from .users import create_user, get_me, edit_user
-from .gateway import event_dispatcher, connect
+from .gateway import event_recv
 from orjson import dumps
 
 app = sanic.Sanic('okemia', dumps=dumps)
+ratelimiter.init_app(app)
 
-app.add_route(create_user, '/users/create', methods=['POST'])
-app.add_route(get_me, '/users/me', methods=['GET'])
-app.add_route(edit_user, '/users/edit', methods=['PATCH'])
-app.add_websocket_route(event_dispatcher, '/gateway/events')
-app.add_websocket_route(connect, '/gateway')
+# User Management
+app.add_route(create_user, '/v1/users', methods=['POST'])
+app.add_route(get_me, '/v1/users/me', methods=['GET'])
+app.add_route(edit_user, '/v1/users/edit', methods=['PATCH'])
+
+# Guilds
+
+## Guild Channels
+app.add_route(channels.create_channel, '/v1/channels', methods=['POST'])
+
+# Gateway
+app.add_websocket_route(event_recv, '/gateway/v1')
 
 app.run()

@@ -15,19 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import sanic
-from .events import events_to_dispatch
-from .data_bodys import connected_clients, session_ids
-
-async def event_dispatcher(request: sanic.Request, ws):
-    while True:
-        if request.headers.get('Authorization') in connected_clients:
-            for name, data in events_to_dispatch.items():
-                await ws.send(data)
-                events_to_dispatch.pop(name)
-
-async def connect(request: sanic.Request, ws):
-    d = ws.recv()
-    
-    if d['session_id'] in session_ids:
-        ...
+"""
+You're probably questioning why this page is currently empty and there is only 1 answer to that.
+i honestly don't think sanic is good for WebSocket connections so i'm currently finding at alternative for it.
+"""

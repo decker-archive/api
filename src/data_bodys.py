@@ -17,12 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 error_bodys = {
-    'no_auth': "You aren't supposed to be here! bezerk!",
+    'no_auth': {
+        'message': "You aren't supposed to be here! bezerk!"
+    },
     'invalid_data': {
         'message': 'Invalid data was given'
-    }
+    },
 }
-
-connected_clients = []
-
-session_ids = []

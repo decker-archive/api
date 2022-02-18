@@ -15,22 +15,29 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import orjson
 import sanic
-from hashlib import sha256
-from .database import users
+from ..database import channels, users
+from ..data_bodys import error_bodys
+from ..ratelimiting import ratelimiter
 
-def get_hash_for(password: str):
-    """Resolves the lowest amount of data-leak and/or password leak possible."""
-    return sha256(password.encode()).hexdigest()
+@ratelimiter.limit('20/minute')
+async def create_channel(request: sanic.Request):
+    auth = request.headers.get('Authorization')
+    ver = users.find_one({'session_ids': [auth]})
+    let = False
 
-def valid_session_id(req: sanic.Request):
-    r = users.find_one({'session_ids': [req.headers.get('Authorization')]})
-
-    if r == None:
-        return None
-
-    for sessionid in r['session_ids']:
-        if sessionid == req.headers.get('Authorization'):
-            return r
+    for session_id in ver['session_ids']:
+        if session_id == auth:
+            let = True
     
-    return None
+    if let == False:
+        return sanic.json(error_bodys['no_auth'], 401)
+    d: dict = request.load_json(loads=orjson.loads)
+    try:
+        data = {
+            'name': d['name'],
+
+        }
+    except KeyError:
+        return sanic.json(error_bodys['invalid_data'])
