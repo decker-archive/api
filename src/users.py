@@ -98,7 +98,10 @@ async def edit_user(require: sanic.Request):
     if given == {}:
         return sanic.json(body=error_bodys['invalid_data'])
     
-    users.find_one_and_update()
+    up = users.find_one({'session_ids': [auth]})
+    users.update_one(up['id'], given)
+
+    return sanic.json(body=json.loads(given))
 
 @ratelimiter.limit('100/minute', key_func=valid_session_id)
 async def get_me(require: sanic.Request):
