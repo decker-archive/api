@@ -4,3 +4,4 @@ sanic
 pymongo[srv]
 python-dotenv
 sanic_limiter
+aiohttp

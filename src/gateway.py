@@ -15,7 +15,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-"""
-You're probably questioning why this page is currently empty and there is only 1 answer to that.
-i honestly don't think sanic is good for WebSocket connections so i'm currently finding at alternative for it.
-"""

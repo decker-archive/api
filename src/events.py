@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-from typing import Any, Dict
+from typing import Any
+from collections import OrderedDict
 
-events_to_dispatch: Dict[str, Dict[str, Any]] = {}
-# {'event': 'MESSAGE', 'data': {...}}
+events_to_dispatch: OrderedDict[str, OrderedDict[str, Any]] = OrderedDict()

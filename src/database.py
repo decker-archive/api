@@ -44,3 +44,8 @@ group_dm = _dms.get_collection('groups', read_preference=pymongo.ReadPreference.
 
 # the servers the user is in (partial server object.)
 servers = _users.get_collection('servers')
+
+# while this is probably cutting some corners 
+# and could make gateway connections slightly more slower,
+# it is the only thing i could think of for this.
+gateway = client.get_database('gateway')
