@@ -15,7 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import asyncio
 from typing import Any
 from collections import OrderedDict
+
+async def add_event(event, data):
+    events_to_dispatch[event] = data
+    await asyncio.sleep(0.2)
+    events_to_dispatch.pop(event)
 
 events_to_dispatch: OrderedDict[str, OrderedDict[str, Any]] = OrderedDict()

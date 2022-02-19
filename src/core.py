@@ -20,6 +20,7 @@ from .ratelimiting import ratelimiter
 from .servers import channels
 from .users import create_user, get_me, edit_user
 from orjson import dumps
+from .gateway import event_send
 
 app = sanic.Sanic('okemia', dumps=dumps)
 ratelimiter.init_app(app)
@@ -35,6 +36,6 @@ app.add_route(edit_user, '/v1/users/edit', methods=['PATCH'])
 app.add_route(channels.create_channel, '/v1/channels', methods=['POST'])
 
 # Gateway
-
+app.add_websocket_route(event_send, '/v1')
 
 app.run()
