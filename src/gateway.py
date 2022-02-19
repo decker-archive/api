@@ -25,7 +25,6 @@ from .snowflakes import hash_from
 
 async def event_send(req: sanic.Request, ws: impl.WebsocketImplProtocol):
     while True:
-        events_already_given = {}
         if req.headers.get('Authorization') == None:
             await ws.close(4001, 'No authorization provided')
             break
@@ -41,13 +40,4 @@ async def event_send(req: sanic.Request, ws: impl.WebsocketImplProtocol):
                 's': name,
                 'd': data
             }
-
-            if data in events_already_given.values():
-                pass
-            else:
-                events_already_given[hash_from()] = s
-                await ws.send(orjson.dumps(s))
-        
-        await asyncio.sleep(1)
-
-        events_already_given.clear()
+            await ws.send(orjson.dumps(s))
