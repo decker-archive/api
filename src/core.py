@@ -16,14 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import sanic
-from .ratelimiting import ratelimiter
+import sanic_limiter
 from .servers import channels
 from .users import create_user, get_me, edit_user
 from orjson import dumps
 from .gateway import event_send
 
 app = sanic.Sanic('okemia', dumps=dumps)
-ratelimiter.init_app(app)
+ratelimiter = sanic_limiter.Limiter(app=app, key_func=sanic_limiter.get_remote_address)
 
 # User Management
 app.add_route(create_user, '/v1/users', methods=['POST'])

@@ -15,7 +15,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import sanic_limiter
-
-ratelimiter = sanic_limiter.Limiter(key_func=sanic_limiter.get_remote_address)
+from .core import ratelimiter
 

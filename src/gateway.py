@@ -15,13 +15,29 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import asyncio
+from typing import Set
 import orjson
+import asyncio
 import sanic
 from sanic.server.websockets import impl
 from .database import users
 from .events import events_to_dispatch
-from .snowflakes import hash_from
+
+clients: Set[impl.WebsocketImplProtocol] = set()
+sending_events: bool = False
+
+async def send_events():
+    for ws in clients:
+        for name, data in events_to_dispatch.items():
+            s = {
+                's': name,
+                'd': data
+            }
+            await ws.send(orjson.dumps(s))
+    
+    await asyncio.sleep(0.3)
+    
+    await send_events()
 
 async def event_send(req: sanic.Request, ws: impl.WebsocketImplProtocol):
     while True:
@@ -30,14 +46,13 @@ async def event_send(req: sanic.Request, ws: impl.WebsocketImplProtocol):
             break
             
         a = req.headers.get('Authorization')
+
         if users.find_one({'session_ids': [a]}) == None:
             await ws.close(4001, 'No authorization provided')
             break
+            
+        clients.add(ws)
 
-
-        for name, data in events_to_dispatch.items():
-            s = {
-                's': name,
-                'd': data
-            }
-            await ws.send(orjson.dumps(s))
+        if not sending_events:
+            send_events = True
+            await send_events()
