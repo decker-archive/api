@@ -15,5 +15,23 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-from .core import ratelimiter
+import quart_rate_limiter
+from quart import Quart
+from .servers import channels
+from .users import create_user, get_me, edit_user
+from .gateway import echo, recv
 
+app = Quart(__name__)
+
+rates = quart_rate_limiter.RateLimiter(app=app)
+
+# users
+app.add_url_rule('/v1/users/@me', view_func=create_user, methods=['POST'])
+app.add_url_rule('/v1/users/@me', view_func=get_me, methods=['GET'])
+app.add_url_rule('/v1/users/@me', view_func=edit_user, methods=['PATCH'])
+
+# gateway
+app.add_websocket('/v1', view_func=recv)
+app.add_websocket('/echo', view_func=echo)
+
+app.run()

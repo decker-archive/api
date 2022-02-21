@@ -15,22 +15,17 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import sanic
-from hashlib import sha256
-from .database import users
 
-def get_hash_for(password: str):
-    """Resolves the lowest amount of data-leak and/or password leak possible."""
-    return sha256(password.encode()).hexdigest()
+import json
 
-def valid_session_id(req: sanic.Request):
-    r = users.find_one({'session_ids': [req.headers.get('Authorization')]})
 
-    if r == None:
-        return None
-
-    for sessionid in r['session_ids']:
-        if sessionid == req.headers.get('Authorization'):
-            return r
-    
-    return None
+error_bodys = {
+    'no_auth': json.dumps({
+        'code': 401,
+        'message': "You aren't supposed to be here! bezerk!"
+    }),
+    'invalid_data': json.dumps({
+        'code': 400,
+        'message': 'Invalid data was given'
+    }),
+}

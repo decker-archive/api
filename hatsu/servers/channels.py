@@ -15,15 +15,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import orjson
-import sanic
+from datetime import timedelta
+import quart
 from ..database import channels, users
 from ..data_bodys import error_bodys
-from ..ratelimiting import ratelimiter
+from quart_rate_limiter import rate_limit
 
-@ratelimiter.limit('20/minute')
-async def create_channel(request: sanic.Request):
-    auth = request.headers.get('Authorization')
+@rate_limit(20, period=timedelta(minutes=1))
+async def create_channel():
+    auth = quart.request.headers.get('Authorization')
     ver = users.find_one({'session_ids': [auth]})
     let = False
 
@@ -32,12 +32,12 @@ async def create_channel(request: sanic.Request):
             let = True
     
     if let == False:
-        return sanic.json(error_bodys['no_auth'], 401)
-    d: dict = request.load_json(loads=orjson.loads)
+        return quart.Response(error_bodys['no_auth'], 401)
+    d: dict = await quart.request.get_json()
     try:
         data = {
             'name': d['name'],
 
         }
     except KeyError:
-        return sanic.json(error_bodys['invalid_data'])
+        return quart.Response(error_bodys['invalid_data'], 400)

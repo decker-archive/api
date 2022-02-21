@@ -16,26 +16,27 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import json
-import orjson
-import sanic
+import quart
+from datetime import timedelta
 from .snowflakes import snowflake_with_blast
 from .data_bodys import error_bodys
 from .database import users
-from .encrypt import get_hash_for, valid_session_id
-from .ratelimiting import ratelimiter
+from .encrypt import get_hash_for
+from quart_rate_limiter import rate_limit
 
-@ratelimiter.limit('1/hour', key_func=valid_session_id)
-async def create_user(require: sanic.Request):
-    d: dict = require.load_json(loads=orjson.loads)
+
+@rate_limit(1, timedelta(hours=1), key_function=quart.Request.authorization)
+async def create_user():
+    d: dict = await quart.request.get_json(True)
 
     if d['separator'] == int:
-        return sanic.json(body=error_bodys['invalid_data'], status=400)
+        return quart.Response(error_bodys['invalid_data'], status=400)
 
     if len(d['separator']) != 4:
-        return sanic.json(body=error_bodys['invalid_data'], status=400)
+        return quart.Response(body=error_bodys['invalid_data'], status=400)
     
     if d['separator'] == 0000:
-        return sanic.json(body=error_bodys['invalid_data'], status=400)
+        return quart.Response(error_bodys['invalid_data'], status=400)
 
     try:
         given = {
@@ -52,34 +53,34 @@ async def create_user(require: sanic.Request):
             'password': get_hash_for(d.pop('password')),
             'system': False,
             'session_ids': [
-                snowflake_with_blast(7)
+                str(snowflake_with_blast(7))
             ]
         }
     except KeyError:
-        return sanic.json(body=error_bodys['invalid_data'], status=400)
+        return quart.Response(body=error_bodys['invalid_data'], status=400)
     else:
-        r = sanic.json(json.dumps(given), status=201)
+        r = quart.Response(json.dumps(given), status=201)
         users.insert_one(given)
         return r
 
-@ratelimiter.limit('10/minute', key_func=valid_session_id)
-async def edit_user(require: sanic.Request):
-    auth = require.headers.get('Authorization')
+@rate_limit(10, timedelta(seconds=1))
+async def edit_user():
+    auth = quart.request.headers.get('Authorization', '')
     allow = False
-    for session_id in users.find({'session_ids': [auth]}):
-        if session_id == require.headers.get('Authorization'):
+    for session_id in users.find({'session_ids': [int(auth)]}):
+        if session_id == quart.request.headers.get('Authorization'):
             allow = True
     
     if allow == False:
-        return sanic.json(body=error_bodys['no_auth'], status=401)
+        return quart.Response(error_bodys['no_auth'], status=401)
 
-    d: dict = require.load_json(loads=orjson.loads)
+    d: dict = await quart.request.get_json()
 
     if d.get('separator'):
         if len(d['separator']) != 4:
-            return sanic.json(body=error_bodys['invalid_data'])
+            return quart.Response(error_bodys['invalid_data'], 400)
         elif d['separator'] == 0000:
-            return sanic.json(body=error_bodys['invalid_data'])
+            return quart.Response(error_bodys['invalid_data'], 400)
     
     given = {}
 
@@ -96,21 +97,21 @@ async def edit_user(require: sanic.Request):
         given['password'] = get_hash_for(d.pop('password'))
     
     if given == {}:
-        return sanic.json(body=error_bodys['invalid_data'])
+        return quart.Response(error_bodys['invalid_data'], 400)
     
     up = users.find_one({'session_ids': [auth]})
     users.update_one(up['id'], given)
 
-    return sanic.json(body=json.loads(given))
+    return quart.Response(json.loads(given), 200)
 
-@ratelimiter.limit('100/minute', key_func=valid_session_id)
-async def get_me(require: sanic.Request):
-    auth = require.headers.get('Authorization')
+@rate_limit(100, period=timedelta(minutes=10))
+async def get_me():
+    auth = quart.request.headers.get('Authorization')
     cur = None
     find = users.find_one({'session_ids': [auth]})
     
     for session_id in find['session_ids']:
-        if session_id == require.headers.get('Authorization'):
+        if session_id == quart.request.headers.get('Authorization'):
             cur = {
             'id': find['id'],
             'username': find['username'],
@@ -118,12 +119,11 @@ async def get_me(require: sanic.Request):
             'avatar_url': find['avatar_url'],
             'banner_url': find['banner_url'],
             'flags': find['flags'],
-            'uuid': find['uuid'],
             'verified': find['verified'],
             'system': find['system'],
         }
     
     if cur is None:
-        return sanic.json(body=error_bodys['no_auth'], status=401)
+        return quart.Response(error_bodys['no_auth'], status=401)
     
-    return sanic.json(body=cur) # i don't know how this would be given yet.
+    return quart.Response(json.dumps(cur))

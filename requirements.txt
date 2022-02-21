@@ -1,7 +1,7 @@
 orjson
 snowflake-id
-sanic
 pymongo[srv]
 python-dotenv
-sanic_limiter
-aiohttp
+quart
+hypercorn
+quart-rate-limiter

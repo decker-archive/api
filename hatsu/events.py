@@ -15,27 +15,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import sanic
-import sanic_limiter
-from .servers import channels
-from .users import create_user, get_me, edit_user
-from orjson import dumps
-from .gateway import event_send
+import asyncio
+from typing import Any
+from collections import OrderedDict
+from .snowflakes import snowflake_with_blast
 
-app = sanic.Sanic('okemia', dumps=dumps)
-ratelimiter = sanic_limiter.Limiter(app=app, key_func=sanic_limiter.get_remote_address)
+async def add_event(event, data):
+    events_to_dispatch[snowflake_with_blast(9)] = data
 
-# User Management
-app.add_route(create_user, '/v1/users', methods=['POST'])
-app.add_route(get_me, '/v1/users/me', methods=['GET'])
-app.add_route(edit_user, '/v1/users/edit', methods=['PATCH'])
-
-# Guilds
-
-## Guild Channels
-app.add_route(channels.create_channel, '/v1/channels', methods=['POST'])
-
-# Gateway
-app.add_websocket_route(event_send, '/v1')
-
-app.run()
+events_to_dispatch: OrderedDict[str, OrderedDict[str, Any]] = OrderedDict()

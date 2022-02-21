@@ -15,13 +15,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import asyncio
-from typing import Any
-from collections import OrderedDict
+import sanic
+from hashlib import sha256
+from .database import users
 
-async def add_event(event, data):
-    events_to_dispatch[event] = data
-    await asyncio.sleep(0.2)
-    events_to_dispatch.pop(event)
+def get_hash_for(password: str):
+    """Resolves the lowest amount of data-leak and/or password leak possible."""
+    return sha256(password.encode()).hexdigest()
 
-events_to_dispatch: OrderedDict[str, OrderedDict[str, Any]] = OrderedDict()
+def valid_session_id(req: sanic.Request):
+    r = users.find_one({'session_ids': [req.headers.get('Authorization')]})
+
+    if r == None:
+        return None
+
+    for session_id in r['session_ids']:
+        if session_id == req.headers.get('Authorization'):
+            return r
+    
+    return None

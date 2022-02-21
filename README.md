@@ -4,9 +4,9 @@ The REST API and soon to be Gateway of okemia.
 # Made with:
 [Python](https://python.org)
 
-[Sanic](https://sanic.dev)
+[Sanic](https://sanic.dev) (**Not in use anymore**)
 
-[Sanic Limiter](https://github.com/bohea/sanic-limiter)
+[Sanic Limiter](https://github.com/bohea/sanic-limiter) (**Not in use anymore**)
 
 [Snowflake ID](https://github.com/vd2org/snowflake)
 
