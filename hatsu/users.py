@@ -67,7 +67,7 @@ async def create_user():
 async def edit_user():
     auth = quart.request.headers.get('Authorization', '')
     allow = False
-    for session_id in users.find({'session_ids': [int(auth)]}):
+    for session_id in users.find({'session_ids': [auth]}):
         if session_id == quart.request.headers.get('Authorization'):
             allow = True
     
