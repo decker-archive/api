@@ -159,6 +159,7 @@ class WebSocket:
                 await self.ws.close(4001, 'Payload length exceeded')
             payload = self.encoder(msg)
             _log.debug(f'Received\n{payload}')
+            self.process_message(payload)
     
     async def process_message(self, payload):
         try:

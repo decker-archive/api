@@ -37,4 +37,4 @@ async def health_check():
 
 @app.before_serving
 async def app_before_serving():
-    ...
+    await start_websocket()

@@ -16,5 +16,5 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import os
-
-os.system('hypercorn --bind 0.0.0.0:443 --keyfile key.pem --certfile cert.pem hatsu.core:app')
+#  --keyfile key.pem --certfile cert.pem
+os.system('hypercorn --bind 0.0.0.0:443 hatsu.core:app')
