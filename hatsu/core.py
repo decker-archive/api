@@ -1,8 +1,9 @@
+import json
 import websockets.server
 import dotenv
 import quart_rate_limiter
 import logging
-from quart import Quart
+from quart import Quart, Response
 from .gateway import handler
 from .rest.servers import channels
 from .rest.users import create_user, get_me, edit_user
@@ -28,6 +29,11 @@ async def start_websocket():
     kwargs = {'ws_handler': _wrapper, 'host': '0.0.0.0', 'port': 443}
 
     return websockets.server.serve(**kwargs)
+
+@app.route('/')
+async def health_check():
+    d = {'success': True, 'message': 'Welcome'}
+    return Response(json.dumps(d), 200)
 
 @app.before_serving
 async def app_before_serving():
