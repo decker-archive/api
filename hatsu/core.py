@@ -22,7 +22,7 @@ app.sessions = set()
 async def start_websocket():
     
     async def _wrapper(ws, url):
-        await handler.gateway_handler(app, ws, url)
+        return await handler.gateway_handler(app, ws, url)
 
     kwargs = {'ws_handler': _wrapper, 'host': '0.0.0.0', 'port': 443}
 
