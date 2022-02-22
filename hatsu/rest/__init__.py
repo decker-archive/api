@@ -32,4 +32,4 @@ app.add_url_rule('/v1/users/@me', view_func=create_user, methods=['POST'])
 app.add_url_rule('/v1/users/@me', view_func=get_me, methods=['GET'])
 app.add_url_rule('/v1/users/@me', view_func=edit_user, methods=['PATCH'])
 
-app.run(host=os.getenv('host'))
+app.run(host='0.0.0.0')
