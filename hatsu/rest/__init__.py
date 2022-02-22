@@ -15,12 +15,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import os
+import dotenv
 import quart_rate_limiter
 from quart import Quart
 from .servers import channels
 from .users import create_user, get_me, edit_user
 
 app = Quart(__name__)
+dotenv.load_dotenv()
 
 rates = quart_rate_limiter.RateLimiter(app=app)
 
@@ -29,4 +32,4 @@ app.add_url_rule('/v1/users/@me', view_func=create_user, methods=['POST'])
 app.add_url_rule('/v1/users/@me', view_func=get_me, methods=['GET'])
 app.add_url_rule('/v1/users/@me', view_func=edit_user, methods=['PATCH'])
 
-app.run()
+app.run(host=os.getenv('host'))
