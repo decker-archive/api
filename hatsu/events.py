@@ -15,12 +15,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import asyncio
-from typing import Any
-from collections import OrderedDict
-from .snowflakes import snowflake_with_blast
+from .database import events
 
 async def add_event(event, data):
-    events_to_dispatch[snowflake_with_blast(9)] = data
+    events.insert_one({'t': event, 'd': data})
 
-events_to_dispatch: OrderedDict[str, OrderedDict[str, Any]] = OrderedDict()

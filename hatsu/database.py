@@ -28,6 +28,7 @@ client = pymongo.MongoClient(os.getenv('mongo_uri'))
 _users = client.get_database('users', read_preference=pymongo.ReadPreference.SECONDARY)
 _servers = client.get_database('servers', read_preference=pymongo.ReadPreference.SECONDARY)
 _dms = client.get_database('direct_messages', read_preference=pymongo.ReadPreference.SECONDARY)
+_events = client.get_database('events')
 
 # users, core
 users = _users.get_collection('core', read_preference=pymongo.ReadPreference.SECONDARY)
@@ -44,3 +45,6 @@ group_dm = _dms.get_collection('groups', read_preference=pymongo.ReadPreference.
 
 # the servers the user is in (partial server object.)
 servers = _users.get_collection('servers')
+
+# core events
+events = _events.get_collection('core')
