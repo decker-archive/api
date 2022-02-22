@@ -93,9 +93,10 @@ async def get_me():
     cur = None
     find = users.find_one({'session_ids': [auth]})
     
-    for session_id in find['session_ids']:
-        if session_id == quart.request.headers.get('Authorization'):
-            cur = {
+    try:
+        for session_id in find['session_ids']:
+            if session_id == quart.request.headers.get('Authorization'):
+                cur = {
             'id': find['id'],
             'username': find['username'],
             'separator': find['separator'],
@@ -105,6 +106,8 @@ async def get_me():
             'verified': find['verified'],
             'system': find['system'],
         }
+    except TypeError:
+        return quart.Response(error_bodys['no_auth'], status=401)
     
     if cur is None:
         return quart.Response(error_bodys['no_auth'], status=401)
