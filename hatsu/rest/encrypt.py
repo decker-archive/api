@@ -15,6 +15,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import os
+from hashlib import sha256
+from .database import users
 
-os.system('hypercorn hatsu.rest:app')
+def get_hash_for(password: str):
+    """Resolves the lowest amount of data-leak and/or password leak possible."""
+    return sha256(password.encode()).hexdigest()

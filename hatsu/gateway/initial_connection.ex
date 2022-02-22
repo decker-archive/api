@@ -1,4 +1,4 @@
-"""
+@moduledoc ~S"""
 hatsu - The okemia rest and gateway api
 Copyright (C) 2021-2022, okemia
 
@@ -15,22 +15,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import sanic
-from hashlib import sha256
-from .database import users
-
-def get_hash_for(password: str):
-    """Resolves the lowest amount of data-leak and/or password leak possible."""
-    return sha256(password.encode()).hexdigest()
-
-def valid_session_id(req: sanic.Request):
-    r = users.find_one({'session_ids': [req.headers.get('Authorization')]})
-
-    if r == None:
-        return None
-
-    for session_id in r['session_ids']:
-        if session_id == req.headers.get('Authorization'):
-            return r
-    
-    return None
