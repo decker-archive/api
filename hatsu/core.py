@@ -2,7 +2,6 @@ import json
 import websockets.server
 import dotenv
 import quart_rate_limiter
-import logging
 from quart import Quart, Response
 from .gateway import handler
 from .rest.servers import channels
@@ -10,7 +9,6 @@ from .rest.users import create_user, get_me, edit_user
 
 app = Quart(__name__)
 dotenv.load_dotenv()
-logging.basicConfig(level=logging.DEBUG)
 
 rates = quart_rate_limiter.RateLimiter(app=app)
 
