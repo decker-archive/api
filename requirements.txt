@@ -5,3 +5,5 @@ python-dotenv
 quart
 hypercorn
 quart-rate-limiter
+Earl-ETF
+websockets
