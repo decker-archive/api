@@ -22,7 +22,7 @@ app.add_url_rule('/v1/users/@me', view_func=edit_user, methods=['PATCH'])
 @app.before_serving
 async def start_gateway():
     print('Starting Gateway')
-    await server.serve(handler.gateway_handler, 'localhost', 7560, ping_timeout=30)
+    await server.serve(handler.gateway_handler, '0.0.0.0', 443, ping_timeout=30)
 
 @app.route('/')
 async def health_check():
