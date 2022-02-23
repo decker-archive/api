@@ -16,8 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import os
-import logging
 #  --keyfile key.pem --certfile cert.pem
-
-logging.basicConfig(level=logging.DEBUG)
-os.system('hypercorn --bind 0.0.0.0:443 hatsu.core:app')
+# --bind 0.0.0.0:443
+os.system('hypercorn hatsu.core:app')

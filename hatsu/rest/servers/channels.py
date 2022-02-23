@@ -2,7 +2,9 @@ from datetime import timedelta
 import quart
 from ..database import channels, users
 from ..data_bodys import error_bodys
+from ...gateway import connection
 from quart_rate_limiter import rate_limit
+from ..snowflakes import snowflake_with_blast
 
 @rate_limit(20, period=timedelta(minutes=1))
 async def create_channel():
@@ -19,8 +21,11 @@ async def create_channel():
     d: dict = await quart.request.get_json()
     try:
         data = {
+            'id': snowflake_with_blast(2),
             'name': d['name'],
 
         }
     except KeyError:
         return quart.Response(error_bodys['invalid_data'], 400)
+
+    await connection.dispatch_event('channel_create', data)

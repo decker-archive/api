@@ -35,6 +35,7 @@ async def create_user():
             'email': d['email'],
             'password': get_hash_for(d.pop('password')),
             'system': False,
+            'email_verified': False,
             'session_ids': [
                 str(snowflake_with_blast(7))
             ]
@@ -46,7 +47,7 @@ async def create_user():
         users.insert_one(given)
         return r
 
-@rate_limit(10, timedelta(seconds=1))
+@rate_limit(2, timedelta(seconds=1))
 async def edit_user():
     auth = quart.request.headers.get('Authorization', '')
     allow = False
@@ -87,7 +88,7 @@ async def edit_user():
 
     return quart.Response(json.loads(given), 200)
 
-@rate_limit(100, period=timedelta(minutes=10))
+@rate_limit(5, period=timedelta(seconds=1))
 async def get_me():
     auth = quart.request.headers.get('Authorization')
     cur = None
