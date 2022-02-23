@@ -22,9 +22,9 @@ app.add_url_rule('/v1/users/@me', view_func=edit_user, methods=['PATCH'])
 @app.before_serving
 async def start_gateway():
     print('Starting Gateway')
-    await server.serve(handler.gateway_handler, '0.0.0.0', 420, ping_timeout=30)
+    await server.serve(handler.gateway_handler, '0.0.0.0', 56, ping_timeout=30)
 
 @app.route('/')
 async def health_check():
-    d = {'http': 'https://hatsu.vincentrps.xyz', 'gateway': 'wss://hatsu.vincentrps.xyz:420'}
+    d = {'http': 'https://hatsu.vincentrps.xyz', 'gateway': 'wss://hatsu.vincentrps.xyz:56'}
     return Response(json.dumps(d), 200)
