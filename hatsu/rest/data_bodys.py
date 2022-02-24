@@ -10,9 +10,9 @@ error_bodys = {
         'code': 400,
         'message': 'Invalid data was given'
     }),
-    'not_in_server': json.dumps({
+    'not_in_guild': json.dumps({
         'code': 401,
-        'message': 'You aren\'t in this server'
+        'message': 'You aren\'t in this guild'
     }),
     'missing_perms': json.dumps(
         {

@@ -1,13 +1,15 @@
 import json
 import quart
 from datetime import timedelta
-from .snowflakes import snowflake_with_blast
-from .data_bodys import error_bodys
-from .database import users
-from .encrypt import get_hash_for
+from ..snowflakes import snowflake_with_blast
+from ..data_bodys import error_bodys
+from ..database import users
+from ..encrypt import get_hash_for
 from quart_rate_limiter import rate_limit
 
+users_me = quart.Blueprint('users_me', __name__)
 
+@users_me.post('/')
 @rate_limit(1, timedelta(hours=1), key_function=quart.Request.authorization)
 async def create_user():
     d: dict = await quart.request.get_json(True)
@@ -47,6 +49,7 @@ async def create_user():
         users.insert_one(given)
         return r
 
+@users_me.patch('/')
 @rate_limit(2, timedelta(seconds=1))
 async def edit_user():
     auth = quart.request.headers.get('Authorization', '')
@@ -88,6 +91,7 @@ async def edit_user():
 
     return quart.Response(json.loads(given), 200)
 
+@users_me.get('/')
 @rate_limit(5, period=timedelta(seconds=1))
 async def get_me():
     auth = quart.request.headers.get('Authorization')
