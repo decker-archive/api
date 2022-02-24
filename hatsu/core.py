@@ -24,5 +24,5 @@ app.add_url_rule('/v1/servers/channels', view_func=channels.create_channel, meth
 
 @app.route('/')
 async def health_check():
-    d = {'http': 'https://hatsu.vincentrps.xyz', 'gateway': 'wss://hatsu.vincentrps.xyz'}
+    d = {'http': 'https://hatsu.vincentrps.xyz', 'gateway': 'wss://gateway.vincentrps.xyz'}
     return Response(json.dumps(d), 200)
