@@ -17,12 +17,12 @@ async def create_channel():
     
     if let == False:
         return quart.Response(error_bodys['no_auth'], 401)
+    
     d: dict = await quart.request.get_json()
     try:
         data = {
             'id': snowflake_with_blast(2),
             'name': d['name'],
-
         }
     except KeyError:
         return quart.Response(error_bodys['invalid_data'], 400)

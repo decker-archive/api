@@ -17,7 +17,12 @@ app.add_url_rule('/v1/users/@me', view_func=create_user, methods=['POST'])
 app.add_url_rule('/v1/users/@me', view_func=get_me, methods=['GET'])
 app.add_url_rule('/v1/users/@me', view_func=edit_user, methods=['PATCH'])
 
-@app.route('/')
+# guilds
+
+## channels
+app.add_url_rule('/v1/servers/channels', view_func=channels.create_channel, methods=['POST'])
+
+@app.route('/', ['GET'])
 async def health_check():
     d = {'http': 'https://hatsu.vincentrps.xyz', 'gateway': 'wss://hatsu.vincentrps.xyz'}
     return Response(json.dumps(d), 200)
