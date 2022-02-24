@@ -3,7 +3,7 @@ from websockets import client
 
 async def connect():
     global ws
-    ws: client.WebSocketClientProtocol = await client.connect('wss://gateway.vincentrps.xyz', ping_timeout=30)
+    ws = await client.connect('wss://gateway.vincentrps.xyz', ping_timeout=30)
     await ws.send(json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892', 'v': 1}))
     await dispatch_event('api_ready', None)
 
