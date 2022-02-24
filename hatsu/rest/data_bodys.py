@@ -10,4 +10,14 @@ error_bodys = {
         'code': 400,
         'message': 'Invalid data was given'
     }),
+    'not_in_server': json.dumps({
+        'code': 401,
+        'message': 'You aren\'t in this server'
+    }),
+    'missing_perms': json.dumps(
+        {
+            'code': 401,
+            'message': 'You are missing permissions'
+        }
+    )
 }

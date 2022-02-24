@@ -2,9 +2,11 @@ import json
 import dotenv
 import logging
 import quart_rate_limiter
+from websockets import client
 from quart import Quart, Response
 from .rest.servers import channels
 from .rest.users import create_user, get_me, edit_user
+from .rest.gateway import connect
 
 app = Quart(__name__)
 dotenv.load_dotenv()
@@ -26,3 +28,5 @@ app.add_url_rule('/v1/servers/channels', view_func=channels.create_channel, meth
 async def health_check():
     d = {'http': 'https://hatsu.vincentrps.xyz', 'gateway': 'wss://gateway.vincentrps.xyz'}
     return Response(json.dumps(d), 200)
+
+app.before_serving(connect)
