@@ -28,7 +28,7 @@ async def create_channel(guild_id: int):
     member  = members.find_one({'id': ver['id']})
 
     if member == None:
-        return quart.Response(error_bodys['not_in_guild'], 401)
+        return quart.Response(error_bodys['not_in_guild'], 403)
     
     d: dict = await quart.request.get_json()
 

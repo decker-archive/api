@@ -118,3 +118,29 @@ async def get_me():
         return quart.Response(error_bodys['no_auth'], status=401)
     
     return quart.Response(json.dumps(cur))
+
+@users_me.post('/sessions')
+async def create_session():
+    login: dict = await quart.request.get_json(True)
+
+    u = users.find_one({'email': login.get('email', ''), 'password': get_hash_for(login.get('password', 'nan'))})
+
+    if u == None:
+        return quart.Response(error_bodys['no_auth'], status=401)
+    
+    session_id = snowflake_with_blast(2)
+    
+    users.find_one_and_update({'email': login.get('email'), 'password': get_hash_for(login.get('password', 'nan'))}, {'session_ids': [session_id]})
+    return quart.Response(json.dumps({'session_id': session_id}), 201)
+
+@users_me.delete('/sessions/<int:session_id>')
+async def delete_session(session_id: int):
+    login: dict = await quart.request.get_json(True)
+
+    u = users.find_one({'email': login.get('email', ''), 'password': get_hash_for(login.get('password', 'nan'))})
+
+    if u == None:
+        return quart.Response(error_bodys['no_auth'], status=401)
+
+    users.replace_one({'session_ids': [session_id]}, {'session_ids': []})
+    return quart.Response(json.dumps({'completed': True}), 410)

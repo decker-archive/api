@@ -14,7 +14,7 @@ guilds = quart.Blueprint('guilds', __name__)
     mem = check_if_in_guild(d)
 
     if mem == None:
-        return quart.Response(error_bodys['not_in_guild'], 401)
+        return quart.Response(error_bodys['not_in_guild'], 403)
 """
 
 @guilds.post('/')
