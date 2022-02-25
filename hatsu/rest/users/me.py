@@ -11,7 +11,7 @@ users_me = quart.Blueprint('users_me', __name__)
 
 
 @users_me.post('/')
-@rate_limit(1, timedelta(hours=1), key_function=quart.Request.authorization)
+@rate_limit(1, timedelta(hours=1))
 async def create_user():
     d: dict = await quart.request.get_json(True)
 
