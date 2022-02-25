@@ -120,6 +120,7 @@ async def get_me():
 
 
 @users_me.post('/sessions')
+@rate_limit(1, timedelta(minutes=30))
 async def create_session():
     login: dict = await quart.request.get_json(True)
 
@@ -146,6 +147,7 @@ async def create_session():
 
 
 @users_me.delete('/sessions/<int:session_id>')
+@rate_limit(1, timedelta(seconds=1))
 async def delete_session(session_id: int):
     login: dict = await quart.request.get_json(True)
 

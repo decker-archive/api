@@ -111,6 +111,7 @@ async def create_guild():
     return quart.Response(json.dumps(old), 201)
 
 @guilds.get('/<int:guild_id>')
+@rate_limit(5, timedelta(seconds=1))
 async def get_guild(guild_id):
     user = check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -129,6 +130,7 @@ async def get_guild(guild_id):
     return quart.Response(json.dumps(guild), 200)
 
 @guilds.get('/<int:guild_id>/members')
+@rate_limit(10, timedelta(minutes=1))
 async def get_guild_members(guild_id):
     user = check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -145,6 +147,7 @@ async def get_guild_members(guild_id):
     return quart.Response(json.dumps(ret), 200)
 
 @guilds.post('/invites/<int:invite_str>')
+@rate_limit(5, timedelta(seconds=1))
 async def join_guild(invite_str):
 
     user = check_session_(quart.request.headers.get('Authorization'))
@@ -178,3 +181,23 @@ async def join_guild(invite_str):
         'guild_id': id,
         'roles': ['@everyone']
     }
+
+@guilds.get('/<int:guild_id>/preview')
+@rate_limit(1, timedelta(seconds=1))
+async def get_guild_preview(guild_id):
+
+    guild = guilds_db.find_one({'id': guild_id})
+
+    if guild == None:
+        return quart.Response(error_bodys['not_found'], 404)
+    
+    ret = {
+        'name': guild['name'],
+        'description': guild['description'],
+        'invite_banner': guild['invite_banner'],
+        'partnered': guild['partnered'],
+        'official': guild['official'],
+        'emojis': guild['emojis'],
+    }
+
+    return quart.Response(json.dumps(ret), 200)
