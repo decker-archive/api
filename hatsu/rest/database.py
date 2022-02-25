@@ -43,7 +43,11 @@ group_dm = _dms.get_collection(
 )
 
 # the guilds the user is in (partial  object.)
-guilds = _users.get_collection('guilds')
+guilds = _guilds.get_collection('core')
+
+joined_guilds = _users.get_collection('guilds')
 
 # core events
 events = _events.get_collection('core')
+
+guild_invites = _guilds.get_collection('invites')

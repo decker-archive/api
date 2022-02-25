@@ -14,3 +14,14 @@ async def connect():
 async def dispatch_event(event_name: str, event_data: dict):
     d = {'t': 'DISPATCH', 'd': {'name': event_name.upper(), 'data': event_data}}
     await ws.send(json.dumps(d))
+
+async def dispatch_event_to(user_id: int, event_name: str, event_data: dict):
+    d = {
+    't': 'DISPATCH_TO',
+    'd': {
+        'event_name': event_name.upper(),
+        'data': event_data,
+        'user': user_id
+        }
+    }
+    await ws.send(json.dumps(d))
