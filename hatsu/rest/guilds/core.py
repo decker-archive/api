@@ -128,7 +128,7 @@ async def get_guild(guild_id):
     
     return quart.Response(json.dumps(guild), 200)
 
-@guilds.get('/<int:guild_id/members>')
+@guilds.get('/<int:guild_id>/members>')
 async def get_guild_members(guild_id):
     user = check_session_(quart.request.headers.get('Authorization'))
     if user == None:
