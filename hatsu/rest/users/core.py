@@ -27,6 +27,7 @@ async def get_user(user_id: int):
         'id': user['id'],
         'username': user['username'],
         'separator': user['separator'],
+        'bio': user['bio'],
         'avatar_url': user['avatar_url'],
         'banner_url': user['banner_url'],
         'flags': user['flags'],

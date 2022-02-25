@@ -29,6 +29,7 @@ async def create_user():
             'id': snowflake_with_blast(0),
             'username': d['username'],
             'separator': d['separator'],
+            'bio': d.get('bio', ''),
             'avatar_url': None,
             'banner_url': None,
             'flags': ['Early Adopter'],
@@ -80,6 +81,9 @@ async def edit_user():
 
     if d.get('password'):
         given['password'] = get_hash_for(d.pop('password'))
+    
+    if d.get('bio'):
+        given['bio'] = d.pop('bio')
 
     if given == {}:
         return quart.Response(error_bodys['invalid_data'], 400)
@@ -104,6 +108,7 @@ async def get_me():
                     'id': find['id'],
                     'username': find['username'],
                     'separator': find['separator'],
+                    'bio': find['bio'],
                     'avatar_url': find['avatar_url'],
                     'banner_url': find['banner_url'],
                     'flags': find['flags'],
