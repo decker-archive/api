@@ -30,9 +30,6 @@ channels = _guilds.get_collection(
 messages = _guilds.get_collection(
     'messages', read_preference=pymongo.ReadPreference.SECONDARY
 )
-roles = _guilds.get_collection(
-    'roles', read_preference=pymongo.ReadPreference.SECONDARY
-)
 
 # dms
 normal_dm = _dms.get_collection(

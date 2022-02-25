@@ -5,7 +5,7 @@ from datetime import timedelta, datetime, timezone
 from quart_rate_limiter import rate_limit
 from ..checks import check_session_, check_if_in_guild
 from ..data_bodys import error_bodys
-from ..database import guilds as guilds_db, channels, members, guild_invites, roles
+from ..database import guilds as guilds_db, channels, members, guild_invites
 from ..snowflakes import snowflake_with_blast
 from ..gateway import dispatch_event_to
 
@@ -47,10 +47,15 @@ async def create_guild():
             },
             'emojis': [],
             'roles': [{
+                'id': 0,
                 'name': 'everyone',
                 'position': 0,
                 'color': '#000000',
-                
+                'permissions': [
+                    'VIEW_CHANNELS',
+                    'READ_MESSAGES',
+                    'SEND_MESSAGES'
+                ]
             }]
         }
     except KeyError:
@@ -92,20 +97,12 @@ async def create_guild():
         'mute': False,
         'owner': True,
         'guild_id': id,
+        'roles': [0]
     }
     members.insert_one(first_joined)
     guilds_db.insert_one(req)
     channels.insert_many([cat, default_channels])
-    roles.insert_one({
-        'guild_id': id,
-        'everyone': {
-            'pos': 0,
-            'permissions': ['MESSAGES', 'VIEW_CHANNELS'],
-            'users_with': [
-                owner['id']
-            ]
-        }
-    })
+
     await dispatch_event_to(owner['id'], 'GUILD_CREATE', old)
 
     return quart.Response(json.dumps(old), 201)
@@ -160,6 +157,11 @@ async def join_guild(invite_str):
     if invite == None:
         return quart.Response(error_bodys['not_found'], 404)
     
+    c = members.find_one({'guild_id': invite['guild_id'], 'id': user['id']})
+
+    if c != None:
+        return quart.Response(error_bodys['already_in_guild'], 409)
+    
     member = {
         'user': {
             'id': user['id'],
@@ -179,8 +181,13 @@ async def join_guild(invite_str):
         'mute': False,
         'permissions': [],
         'guild_id': id,
-        'roles': ['@everyone']
+        'roles': [0]
     }
+    ret = member.copy()
+    ret.pop('guild_id')
+    members.insert_one(member)
+
+    return quart.Response(json.dumps(ret), 200)
 
 @guilds.get('/<int:guild_id>/preview')
 @rate_limit(1, timedelta(seconds=1))
@@ -190,7 +197,7 @@ async def get_guild_preview(guild_id):
 
     if guild == None:
         return quart.Response(error_bodys['not_found'], 404)
-    
+
     ret = {
         'name': guild['name'],
         'description': guild['description'],
