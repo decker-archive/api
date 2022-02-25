@@ -15,7 +15,7 @@ rates = quart_rate_limiter.RateLimiter(app=app)
 
 @app.route('/')
 async def health_check():
-    d = {'http': 'https://hatsu.vincentrps.xyz', 'gateway': 'wss://gateway.vincentrps.xyz'}
+    d = {'http': 'https://hatsu.vincentrps.xyz', 'gateway': 'wss://gateway.vincentrps.xyz', 'available': ['1']}
     return Response(json.dumps(d), 200)
 
 app.before_serving(connect)
