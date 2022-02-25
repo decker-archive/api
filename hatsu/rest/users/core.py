@@ -6,10 +6,11 @@ from ..checks import check_session_
 
 users = quart.Blueprint('users', __name__)
 
+
 @users.get('/<int:user_id>')
 async def get_user(user_id: int):
     d = check_session_(quart.request.headers.get('Authorization'))
-    
+
     if d == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
@@ -17,7 +18,7 @@ async def get_user(user_id: int):
 
     if user == None:
         return quart.Response(error_bodys['invalid_data'], 400)
-    
+
     # filter out non-public info, like session_ids
     user_data = {
         'id': user['id'],

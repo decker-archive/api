@@ -13,10 +13,16 @@ logging.basicConfig(level=logging.DEBUG)
 
 rates = quart_rate_limiter.RateLimiter(app=app)
 
+
 @app.route('/')
 async def health_check():
-    d = {'http': 'https://hatsu.vincentrps.xyz', 'gateway': 'wss://gateway.vincentrps.xyz', 'available': ['1']}
+    d = {
+        'http': 'https://hatsu.vincentrps.xyz',
+        'gateway': 'wss://gateway.vincentrps.xyz',
+        'available': ['1'],
+    }
     return Response(json.dumps(d), 200)
+
 
 app.before_serving(connect)
 
@@ -24,7 +30,7 @@ bps = {
     channels.channels: '/v1/guilds',
     guilds_core.guilds: '/v1/guilds',
     me.users_me: '/v1/users/@me',
-    users_core.users: '/v1/users'
+    users_core.users: '/v1/users',
 }
 
 for value, suffix in bps.items():

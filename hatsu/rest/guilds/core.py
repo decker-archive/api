@@ -17,6 +17,7 @@ guilds = quart.Blueprint('guilds', __name__)
         return quart.Response(error_bodys['not_in_guild'], 403)
 """
 
+
 @guilds.post('/')
 @rate_limit(1, timedelta(minutes=1))
 async def create_guild():
@@ -25,7 +26,7 @@ async def create_guild():
         return quart.Response(error_bodys['no_auth'], 401)
 
     d: dict = await quart.request.get_json()
-    
+
     try:
         req = {
             'id': snowflake_with_blast(7),
@@ -41,7 +42,7 @@ async def create_guild():
             'safety': {
                 'level': 0,
                 'msg_notifs': False,
-            }
+            },
         }
     except KeyError:
         return quart.Response(error_bodys['invalid_data'], 400)

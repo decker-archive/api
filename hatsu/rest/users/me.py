@@ -9,6 +9,7 @@ from quart_rate_limiter import rate_limit
 
 users_me = quart.Blueprint('users_me', __name__)
 
+
 @users_me.post('/')
 @rate_limit(1, timedelta(hours=1), key_function=quart.Request.authorization)
 async def create_user():
@@ -19,7 +20,7 @@ async def create_user():
 
     if len(d['separator']) != 4:
         return quart.Response(body=error_bodys['invalid_data'], status=400)
-    
+
     if d['separator'] == 0000:
         return quart.Response(error_bodys['invalid_data'], status=400)
 
@@ -30,17 +31,13 @@ async def create_user():
             'separator': d['separator'],
             'avatar_url': None,
             'banner_url': None,
-            'flags': [
-                'Early Adopter'
-            ],
+            'flags': ['Early Adopter'],
             'verified': False,
             'email': d['email'],
             'password': get_hash_for(d.pop('password')),
             'system': False,
             'email_verified': False,
-            'session_ids': [
-                str(snowflake_with_blast(7))
-            ]
+            'session_ids': [str(snowflake_with_blast(7))],
         }
     except KeyError:
         return quart.Response(body=error_bodys['invalid_data'], status=400)
@@ -48,6 +45,7 @@ async def create_user():
         r = quart.Response(json.dumps(given), status=201)
         users.insert_one(given)
         return r
+
 
 @users_me.patch('/')
 @rate_limit(2, timedelta(seconds=1))
@@ -57,7 +55,7 @@ async def edit_user():
     for session_id in users.find({'session_ids': [auth]}):
         if session_id == quart.request.headers.get('Authorization'):
             allow = True
-    
+
     if allow == False:
         return quart.Response(error_bodys['no_auth'], status=401)
 
@@ -68,28 +66,29 @@ async def edit_user():
             return quart.Response(error_bodys['invalid_data'], 400)
         elif d['separator'] == 0000:
             return quart.Response(error_bodys['invalid_data'], 400)
-    
+
     given = {}
 
     if d.get('username'):
         given['username'] = d.pop('username')
-    
+
     if d.get('separator'):
         given['separator'] = d.pop('sparator')
-    
+
     if d.get('email'):
         given['email'] = d.pop('email')
-    
+
     if d.get('password'):
         given['password'] = get_hash_for(d.pop('password'))
-    
+
     if given == {}:
         return quart.Response(error_bodys['invalid_data'], 400)
-    
+
     up = users.find_one({'session_ids': [auth]})
     users.update_one(up['id'], given)
 
     return quart.Response(json.loads(given), 200)
+
 
 @users_me.get('/')
 @rate_limit(5, period=timedelta(seconds=1))
@@ -97,47 +96,65 @@ async def get_me():
     auth = quart.request.headers.get('Authorization')
     cur = None
     find = users.find_one({'session_ids': [auth]})
-    
+
     try:
         for session_id in find['session_ids']:
             if session_id == quart.request.headers.get('Authorization'):
                 cur = {
-            'id': find['id'],
-            'username': find['username'],
-            'separator': find['separator'],
-            'avatar_url': find['avatar_url'],
-            'banner_url': find['banner_url'],
-            'flags': find['flags'],
-            'verified': find['verified'],
-            'system': find['system'],
-        }
+                    'id': find['id'],
+                    'username': find['username'],
+                    'separator': find['separator'],
+                    'avatar_url': find['avatar_url'],
+                    'banner_url': find['banner_url'],
+                    'flags': find['flags'],
+                    'verified': find['verified'],
+                    'system': find['system'],
+                }
     except TypeError:
         return quart.Response(error_bodys['no_auth'], status=401)
-    
+
     if cur is None:
         return quart.Response(error_bodys['no_auth'], status=401)
-    
+
     return quart.Response(json.dumps(cur))
+
 
 @users_me.post('/sessions')
 async def create_session():
     login: dict = await quart.request.get_json(True)
 
-    u = users.find_one({'email': login.get('email', ''), 'password': get_hash_for(login.get('password', 'nan'))})
+    u = users.find_one(
+        {
+            'email': login.get('email', ''),
+            'password': get_hash_for(login.get('password', 'nan')),
+        }
+    )
 
     if u == None:
         return quart.Response(error_bodys['no_auth'], status=401)
-    
+
     session_id = snowflake_with_blast(2)
-    
-    users.find_one_and_update({'email': login.get('email'), 'password': get_hash_for(login.get('password', 'nan'))}, {'session_ids': [session_id]})
+
+    users.find_one_and_update(
+        {
+            'email': login.get('email'),
+            'password': get_hash_for(login.get('password', 'nan')),
+        },
+        {'session_ids': [session_id]},
+    )
     return quart.Response(json.dumps({'session_id': session_id}), 201)
+
 
 @users_me.delete('/sessions/<int:session_id>')
 async def delete_session(session_id: int):
     login: dict = await quart.request.get_json(True)
 
-    u = users.find_one({'email': login.get('email', ''), 'password': get_hash_for(login.get('password', 'nan'))})
+    u = users.find_one(
+        {
+            'email': login.get('email', ''),
+            'password': get_hash_for(login.get('password', 'nan')),
+        }
+    )
 
     if u == None:
         return quart.Response(error_bodys['no_auth'], status=401)
