@@ -13,7 +13,7 @@ users_me = quart.Blueprint('users_me', __name__)
 @users_me.post('/')
 @rate_limit(1, timedelta(hours=1))
 async def create_user():
-    d: dict = await quart.request.get_json(True)
+    d: dict = await quart.request.get_json()
 
     if d['separator'] == int:
         return quart.Response(error_bodys['invalid_data'], status=400)
