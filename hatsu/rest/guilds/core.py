@@ -19,7 +19,7 @@ guilds = quart.Blueprint('guilds', __name__)
 """
 
 
-@guilds.post('/')
+@guilds.post('')
 @rate_limit(1, timedelta(minutes=1))
 async def create_guild():
     owner = check_session_(quart.request.headers.get('Authorization'))

@@ -10,7 +10,7 @@ from quart_rate_limiter import rate_limit
 users_me = quart.Blueprint('users_me', __name__)
 
 
-@users_me.post('/')
+@users_me.post('')
 @rate_limit(1, timedelta(hours=1))
 async def create_user():
     d: dict = await quart.request.get_json()
@@ -48,7 +48,7 @@ async def create_user():
         return r
 
 
-@users_me.patch('/')
+@users_me.patch('')
 @rate_limit(2, timedelta(seconds=1))
 async def edit_user():
     auth = quart.request.headers.get('Authorization', '')
@@ -94,7 +94,7 @@ async def edit_user():
     return quart.Response(json.loads(given), 200)
 
 
-@users_me.get('/')
+@users_me.get('')
 @rate_limit(5, period=timedelta(seconds=1))
 async def get_me():
     auth = quart.request.headers.get('Authorization')
