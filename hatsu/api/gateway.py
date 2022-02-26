@@ -34,3 +34,4 @@ async def guild_dispatch(guild_id: int, event_name: str, event_data: dict):
             'data': event_data
         }
     }
+    await ws.send(json.dumps(d))
