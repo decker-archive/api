@@ -18,4 +18,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import os
 #  --keyfile key.pem --certfile cert.pem
 # --bind 0.0.0.0:443
-os.system('hypercorn --bind 0.0.0.0:443 hatsu.rest.app:app')
+os.system('hypercorn --bind 0.0.0.0:443 hatsu.api.app:app')

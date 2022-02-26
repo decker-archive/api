@@ -8,7 +8,6 @@ async def connect():
     await ws.send(
         json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892', 'v': 1})
     )
-    await dispatch_event('api_ready', None)
 
 
 async def dispatch_event(event_name: str, event_data: dict):

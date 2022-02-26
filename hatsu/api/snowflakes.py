@@ -5,13 +5,14 @@ import uuid
 from snowflake import SnowflakeGenerator
 
 
-def snowflake_with_blast(instance: int) -> int:
+def snowflake_with_blast(instance: int, sequence: int = 0) -> int:
     """Ensures a Snowflakes safe creation, while being original to it's format"""
     time.sleep(0.01)
 
     return SnowflakeGenerator(
         instance=instance,
         epoch=int(1262304001),
+        seq=int(sequence),
         timestamp=datetime.datetime.now(datetime.timezone.utc).timestamp(),
     ).__next__()
 
