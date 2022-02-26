@@ -3,9 +3,9 @@ import dotenv
 import logging
 import quart_rate_limiter
 from quart import Quart, Response
-from .rest.guilds import channels, core as guilds_core
-from .rest.users import me, core as users_core
-from .rest.gateway import connect
+from .guilds import channels, core as guilds_core
+from .users import me, core as users_core
+from .gateway import connect
 
 app = Quart(__name__)
 dotenv.load_dotenv()
