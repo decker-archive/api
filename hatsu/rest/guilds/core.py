@@ -34,17 +34,13 @@ async def create_guild():
             'id': id,
             'name': d['name'],
             'description': d.get('description', ''),
-            'banner': d.get('banner', ''),
-            'invite_banner': d.get('invite_banner', ''),
+            'banner': None,
+            'invite_banner': None,
             'vanity_url': None,
             'verified': False,
             'partnered': False,
             'official': False,
             'owner': owner['id'],
-            'safety': {
-                'level': 0,
-                'msg_notifs': False,
-            },
             'emojis': [],
             'roles': [{
                 'id': 0,
@@ -69,6 +65,7 @@ async def create_guild():
         'description': 'The first category of your brand new hatsu server!',
         'inside_of': 0,
         'type': 1,
+        'position': 0,
     }
     default_channels = {
         'id': snowflake_with_blast(2),
@@ -77,6 +74,7 @@ async def create_guild():
         'type': 2,
         'guild_id': req['id'],
         'inside_of': cat_id,
+        'position': 0,
     }
     first_joined = {
         'user': {
