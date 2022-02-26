@@ -1,6 +1,7 @@
 import datetime
 import time
 import hashlib
+import uuid
 from snowflake import SnowflakeGenerator
 
 
@@ -21,3 +22,6 @@ def hash_from(snowflake: int = None) -> str:
         return hashlib.sha1(str(snowflake).encode("utf-8")).hexdigest()
     else:
         return hashlib.sha1(str(snowflake_with_blast(9)).encode("utf-8")).hexdigest()
+
+def invite_code() -> str:
+    return uuid.uuid4().hex[-7:]

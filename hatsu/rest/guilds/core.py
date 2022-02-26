@@ -3,11 +3,11 @@ import json
 
 from datetime import timedelta, datetime, timezone
 from quart_rate_limiter import rate_limit
-from ..checks import check_session_, check_if_in_guild
+from ..checks import check_session_
 from ..data_bodys import error_bodys
 from ..database import guilds as guilds_db, channels, members, guild_invites
-from ..snowflakes import snowflake_with_blast
-from ..gateway import dispatch_event_to
+from ..snowflakes import snowflake_with_blast, invite_code
+from ..gateway import dispatch_event_to, guild_dispatch
 
 guilds = quart.Blueprint('guilds', __name__)
 
@@ -50,7 +50,8 @@ async def create_guild():
                 'permissions': [
                     'VIEW_CHANNELS',
                     'READ_MESSAGES',
-                    'SEND_MESSAGES'
+                    'SEND_MESSAGES',
+                    'CREATE_INVITES'
                 ]
             }]
         }
@@ -137,6 +138,7 @@ async def get_guild_members(guild_id):
 
     for _obj in objs:
         _obj.pop('guild_id')
+        _obj['user'].pop('session_ids')
         ret.append(_obj)
     
     return quart.Response(json.dumps(ret), 200)
@@ -170,6 +172,7 @@ async def join_guild(invite_str):
             'flags': user['flags'],
             'verified': user['verified'],
             'system': user['system'],
+            'session_ids': user['session_ids']
         },
         'nick': None,
         'avatar_url': None,
@@ -183,7 +186,13 @@ async def join_guild(invite_str):
     }
     ret = member.copy()
     ret.pop('guild_id')
+    ret['user'].pop('session_ids')
+    dis = member.copy()
+    dis.pop('guild_id')
+    dis['user'].pop('session_ids')
     members.insert_one(member)
+
+    await guild_dispatch(invite['guild_id'], 'MEMBER_JOIN', {'member': dis, 'guild_id': invite['guild_id']})
 
     return quart.Response(json.dumps(ret), 200)
 
@@ -206,3 +215,34 @@ async def get_guild_preview(guild_id):
     }
 
     return quart.Response(json.dumps(ret), 200)
+
+@guilds.post('/<int:guild_id>/invites')
+async def create_invite(guild_id):
+    user = check_session_(quart.request.headers.get('Authorization'))
+    
+    if user == None:
+        return quart.Response(error_bodys['no_auth'], 401)
+    
+    c = members.find_one({'guild_id': guild_id, 'id': user['id']})
+
+    if c == None:
+        return quart.Response(error_bodys['not_in_guild'], 403)
+
+    top_role = guilds_db.find_one(c['roles'][0])
+    
+    allow = False
+
+    for perm in top_role['permissions']:
+        if perm == 'CREATE_INVITES':
+            allow = True
+    
+    if allow == False:
+        return quart.Response(error_bodys['no_auth'], 401)
+
+    code = invite_code()
+
+    guild_invites.insert_one({'guild_id': guild_id, 'code': code})
+
+    await guild_dispatch(guild_id, 'INVITE_CREATE', {'code': code, 'guild_id': guild_id})
+
+    return quart.Response(json.dumps({'code': code}), 201)
