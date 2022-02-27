@@ -26,10 +26,18 @@ async def health_check():
 app.before_serving(connect)
 
 bps = {
+
+    # api v1
     channels.channels: '/api/v1/guilds',
     guilds_core.guilds: '/api/v1/guilds',
     me.users_me: '/api/v1/users/@me',
     users_core.users: '/api/v1/users',
+
+    # api v2    
+    channels.channels: '/api/v2/guilds',
+    guilds_core.guilds: '/api/v2/guilds',
+    me.users_me: '/api/v2/users/@me',
+    users_core.users: '/api/v2/users',
 }
 
 for value, suffix in bps.items():
