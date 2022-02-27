@@ -1,7 +1,6 @@
 import datetime
 import hashlib
-import uuid
-import time
+from .database import guild_invites
 from snowflake import SnowflakeGenerator
 
 seq = 0
@@ -37,4 +36,15 @@ def hash_from(snowflake: int = None) -> str:
         return hashlib.sha1(str(snowflake_with_blast()).encode("utf-8")).hexdigest()
 
 def invite_code() -> str:
-    return uuid.uuid4().hex[-7:]
+    import secrets
+    import re
+
+    raw = secrets.token_urlsafe(10)
+    raw = re.sub(r"\/|\+|\-|\_", "", raw)
+
+    check = guild_invites.find_one({'code': raw})
+
+    if check != None:
+        return invite_code()
+
+    return raw[:7]

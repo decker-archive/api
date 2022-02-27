@@ -4,7 +4,6 @@ from datetime import timedelta
 
 from ..database import channels, users, members
 from ..data_bodys import error_bodys
-from quart_rate_limiter import rate_limit
 from ..snowflakes import snowflake_with_blast
 from ..gateway import dispatch_event
 
@@ -13,7 +12,6 @@ channels = quart.Blueprint('channels', __name__)
 
 
 @channels.post('/<int:guild_id>/channels')
-@rate_limit(20, period=timedelta(minutes=1))
 async def create_channel(guild_id: int):
     auth = quart.request.headers.get('Authorization')
     ver = users.find_one({'session_ids': [auth]})
@@ -61,7 +59,6 @@ async def create_channel(guild_id: int):
 
 
 @channels.get('/channels/<int:channel_id>')
-@rate_limit(2, timedelta(seconds=10))
 async def edit_channel(channel_id: int):
     auth = quart.request.headers.get('Authorization')
     ver = users.find_one({'session_ids': [auth]})
@@ -101,7 +98,6 @@ async def edit_channel(channel_id: int):
 
 
 @channels.delete('/channels/<int:channel_id>')
-@rate_limit(1, timedelta(seconds=4))
 async def delete_channel(channel_id: int):
     auth = quart.request.headers.get('Authorization')
     ver = users.find_one({'session_ids': [auth]})

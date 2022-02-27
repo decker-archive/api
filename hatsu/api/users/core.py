@@ -1,7 +1,6 @@
 import quart
 import json
 from datetime import timedelta
-from quart_rate_limiter import rate_limit
 from ..database import users as users_db
 from ..data_bodys import error_bodys
 from ..checks import check_session_
@@ -10,7 +9,6 @@ users = quart.Blueprint('users', __name__)
 
 
 @users.get('/<int:user_id>')
-@rate_limit(4, timedelta(seconds=1))
 async def get_user(user_id: int):
     d = check_session_(quart.request.headers.get('Authorization'))
 

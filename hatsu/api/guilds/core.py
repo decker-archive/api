@@ -2,7 +2,6 @@ import quart
 import json
 
 from datetime import timedelta, datetime, timezone
-from quart_rate_limiter import rate_limit
 from ..checks import check_session_
 from ..data_bodys import error_bodys
 from ..database import guilds as guilds_db, channels, members, guild_invites
@@ -20,7 +19,6 @@ guilds = quart.Blueprint('guilds', __name__)
 
 
 @guilds.post('')
-@rate_limit(1, timedelta(minutes=1))
 async def create_guild():
     owner = check_session_(quart.request.headers.get('Authorization'))
     if owner == None:
@@ -108,7 +106,6 @@ async def create_guild():
     return quart.Response(json.dumps(old), 201)
 
 @guilds.patch('/<int:guild_id>')
-@rate_limit(2, timedelta(seconds=2))
 async def edit_guild(guild_id: int):
     user = check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -151,7 +148,6 @@ async def edit_guild(guild_id: int):
     return quart.Response(d, 200)
 
 @guilds.delete('/<int:guild_id>')
-@rate_limit(1, timedelta(hours=1))
 async def delete_guild(guild_id: int):
     user = check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -177,7 +173,6 @@ async def delete_guild(guild_id: int):
     return quart.Response(error_bodys['no_content'], 204)
 
 @guilds.get('/<int:guild_id>')
-@rate_limit(5, timedelta(seconds=1))
 async def get_guild(guild_id):
     user = check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -196,7 +191,6 @@ async def get_guild(guild_id):
     return quart.Response(json.dumps(guild), 200)
 
 @guilds.get('/<int:guild_id>/members')
-@rate_limit(10, timedelta(minutes=1))
 async def get_guild_members(guild_id):
     user = check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -214,7 +208,6 @@ async def get_guild_members(guild_id):
     return quart.Response(json.dumps(ret), 200)
 
 @guilds.post('/invites/<int:invite_str>')
-@rate_limit(5, timedelta(seconds=1))
 async def join_guild(invite_str):
 
     user = check_session_(quart.request.headers.get('Authorization'))
@@ -267,7 +260,6 @@ async def join_guild(invite_str):
     return quart.Response(json.dumps(ret), 200)
 
 @guilds.get('/<int:guild_id>/preview')
-@rate_limit(1, timedelta(seconds=1))
 async def get_guild_preview(guild_id):
 
     guild = guilds_db.find_one({'id': guild_id})

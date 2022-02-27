@@ -1,17 +1,19 @@
 import json
 import quart
-from datetime import timedelta
-from ..snowflakes import snowflake_with_blast
+import re
+import verify_email
+from ..snowflakes import snowflake_with_blast, invite_code
 from ..data_bodys import error_bodys
 from ..database import users
 from ..encrypt import get_hash_for
-from quart_rate_limiter import rate_limit
+from ..checks import check_session_
 
 users_me = quart.Blueprint('users_me', __name__)
 
+# regex for emails
+email_regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$' 
 
 @users_me.post('')
-@rate_limit(1, timedelta(hours=1))
 async def create_user():
     d: dict = await quart.request.get_json()
 
@@ -23,10 +25,22 @@ async def create_user():
 
     if d['separator'] == 0000:
         return quart.Response(error_bodys['invalid_data'], status=400)
+    
+    email_code = invite_code()
+
+    if re.search(email_regex, d.get('email')):
+        pass
+    else:
+        return quart.Response(error_bodys['invalid_data'], status=400)
+    
+    true = verify_email.verify_email(d.get('email',''), debug=True)
+
+    if true == False:
+        return quart.Response(error_bodys['invalid_data'], status=400)
 
     try:
         given = {
-            'id': snowflake_with_blast(0),
+            'id': snowflake_with_blast(),
             'username': d['username'],
             'separator': d['separator'],
             'bio': d.get('bio', ''),
@@ -39,17 +53,33 @@ async def create_user():
             'system': False,
             'email_verified': False,
             'session_ids': [str(snowflake_with_blast())],
+            'email_code': email_code
         }
     except KeyError:
         return quart.Response(body=error_bodys['invalid_data'], status=400)
     else:
         r = quart.Response(json.dumps(given), status=201)
+        # email.send(f'Welcome to hatsu! Your verification code is: {email_code}')
         users.insert_one(given)
         return r
 
+@users_me.post('/verify')
+async def verify_me():
+    user = check_session_(quart.request.headers.get('Authorization'))
+    
+    if user == None:
+        return quart.Response(error_bodys['no_auth'], 401)
+    
+    d: dict = quart.request.get_json(True)
+
+    code = d.get('code', '')
+
+    if code != user['email_code']:
+        return quart.Response(error_bodys['no_perms'], 403)
+
+    
 
 @users_me.patch('')
-@rate_limit(2, timedelta(seconds=1))
 async def edit_user():
     auth = quart.request.headers.get('Authorization', '')
     allow = False
@@ -95,7 +125,6 @@ async def edit_user():
 
 
 @users_me.get('')
-@rate_limit(5, period=timedelta(seconds=1))
 async def get_me():
     auth = quart.request.headers.get('Authorization')
     cur = None
@@ -125,7 +154,6 @@ async def get_me():
 
 
 @users_me.post('/sessions')
-@rate_limit(1, timedelta(minutes=30))
 async def create_session():
     login: dict = await quart.request.get_json(True)
 
@@ -152,7 +180,6 @@ async def create_session():
 
 
 @users_me.delete('/sessions/<int:session_id>')
-@rate_limit(1, timedelta(seconds=1))
 async def delete_session(session_id: int):
     login: dict = await quart.request.get_json(True)
 
