@@ -67,6 +67,7 @@ async def create_guild():
         'inside_of': 0,
         'type': 1,
         'position': 0,
+        'guild_id': req['id']
     }
     default_channels = {
         'id': snowflake_with_blast(2),
@@ -105,6 +106,73 @@ async def create_guild():
     await dispatch_event_to(owner['id'], 'GUILD_CREATE', old)
 
     return quart.Response(json.dumps(old), 201)
+
+@guilds.patch('/<int:guild_id>')
+async def edit_guild(guild_id: int):
+    user = check_session_(quart.request.headers.get('Authorization'))
+    if user == None:
+        return quart.Response(error_bodys['no_auth'], 401)
+    
+    member = members.find_one(user['id'])
+
+    if member == None:
+        return quart.Response(error_bodys['no_auth'], 401)
+    
+    guild = guilds_db.find_one({'id': guild_id})
+
+    if guild == None:
+        return quart.Response(error_bodys['not_found'], 404)
+    
+    allow = False
+
+    for perm in member['roles'][0]['permissions']:
+        if perm == 'MANAGE_GUILD':
+            allow = True
+    
+    # incorrect permissions
+    if allow == False:
+        return quart.Response(error_bodys['no_perms'], 403)
+    
+    json: dict = await quart.request.get_json()
+    
+    data = {}
+
+    if json.get('name'):
+        data['name'] = json.pop('name')
+
+    if json.get('description'):
+        data['description'] = json.pop('name')
+    
+    d = data.copy()
+
+    guilds_db.update_one({'id': guild_id}, data)
+
+    return quart.Response(d, 200)
+
+@guilds.delete('/<int:guild_id>')
+async def delete_guild(guild_id: int):
+    user = check_session_(quart.request.headers.get('Authorization'))
+    if user == None:
+        return quart.Response(error_bodys['no_auth'], 401)
+    
+    member = members.find_one(user['id'])
+
+    if member == None:
+        return quart.Response(error_bodys['no_auth'], 401)
+    
+    guild = guilds_db.find_one({'id': guild_id})
+
+    if guild == None:
+        return quart.Response(error_bodys['not_found'], 404)
+
+    if member['owner'] is False:
+        return quart.Response(error_bodys['no_perms'], 403)
+    
+    guilds_db.delete_one({'id': guild_id})
+    members.delete_many({'guild_id': guild_id})
+    channels.delete_many({'guild_id': guild_id})
+
+    return quart.Response(error_bodys['no_content'], 204)
 
 @guilds.get('/<int:guild_id>')
 @rate_limit(5, timedelta(seconds=1))
