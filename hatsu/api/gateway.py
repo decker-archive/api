@@ -23,7 +23,7 @@ async def check_if_closed():
         except:
             get_running_loop().create_task(check_if_closed())
     else:
-        await sleep(10)
+        await sleep(5)
         get_running_loop().create_task(check_if_closed())
 
 
