@@ -13,6 +13,7 @@ async def connect():
 
 async def check_if_closed():
     await sleep(1)
+    global ws
     if ws.closed:
         try:
             ws = await client.connect('wss://gateway.vincentrps.xyz/?v=2', ping_timeout=30)
