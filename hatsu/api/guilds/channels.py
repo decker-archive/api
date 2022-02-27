@@ -43,7 +43,7 @@ async def create_channel(guild_id: int):
 
     try:
         data = {
-            'id': snowflake_with_blast(2),
+            'id': snowflake_with_blast(),
             'name': d['name'].lower(),
             'description': d.get('description', ''),
             'guild_id': guild_id,

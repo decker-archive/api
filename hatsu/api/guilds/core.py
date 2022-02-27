@@ -27,7 +27,7 @@ async def create_guild():
         return quart.Response(error_bodys['no_auth'], 401)
 
     d: dict = await quart.request.get_json()
-    id = snowflake_with_blast(7)
+    id = snowflake_with_blast()
 
     try:
         req = {
@@ -59,7 +59,7 @@ async def create_guild():
         return quart.Response(error_bodys['invalid_data'], 400)
 
     old = req.copy()
-    cat_id = snowflake_with_blast(5)
+    cat_id = snowflake_with_blast()
     cat = {
         'id': cat_id,
         'name': 'General',
@@ -70,7 +70,7 @@ async def create_guild():
         'guild_id': req['id']
     }
     default_channels = {
-        'id': snowflake_with_blast(2),
+        'id': snowflake_with_blast(),
         'name': 'general',
         'description': 'The first channel of your brand new hatsu server!',
         'type': 2,
@@ -108,6 +108,7 @@ async def create_guild():
     return quart.Response(json.dumps(old), 201)
 
 @guilds.patch('/<int:guild_id>')
+@rate_limit(2, timedelta(seconds=2))
 async def edit_guild(guild_id: int):
     user = check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -150,6 +151,7 @@ async def edit_guild(guild_id: int):
     return quart.Response(d, 200)
 
 @guilds.delete('/<int:guild_id>')
+@rate_limit(1, timedelta(hours=1))
 async def delete_guild(guild_id: int):
     user = check_session_(quart.request.headers.get('Authorization'))
     if user == None:

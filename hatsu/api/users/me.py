@@ -38,7 +38,7 @@ async def create_user():
             'password': get_hash_for(d.pop('password')),
             'system': False,
             'email_verified': False,
-            'session_ids': [str(snowflake_with_blast(7))],
+            'session_ids': [str(snowflake_with_blast())],
         }
     except KeyError:
         return quart.Response(body=error_bodys['invalid_data'], status=400)
@@ -139,7 +139,7 @@ async def create_session():
     if u == None:
         return quart.Response(error_bodys['no_auth'], status=401)
 
-    session_id = snowflake_with_blast(2)
+    session_id = snowflake_with_blast()
 
     users.find_one_and_update(
         {
