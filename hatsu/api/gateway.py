@@ -1,13 +1,29 @@
 import json
 from websockets import client
+from asyncio import get_running_loop, sleep
 
 
 async def connect():
     global ws
-    ws = await client.connect('wss://gateway.vincentrps.xyz', ping_timeout=30)
+    ws = await client.connect('wss://gateway.vincentrps.xyz/?v=2', ping_timeout=30)
     await ws.send(
-        json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892', 'v': 1})
+        json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
     )
+    await check_if_closed()
+
+async def check_if_closed():
+    await sleep(1)
+    if ws.closed:
+        try:
+            ws = await client.connect('wss://gateway.vincentrps.xyz/?v=2', ping_timeout=30)
+            await ws.send(
+                json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
+            )
+        except:
+            get_running_loop().create_task(check_if_closed())
+    else:
+        await sleep(10)
+        get_running_loop().create_task(check_if_closed())
 
 
 async def dispatch_event(event_name: str, event_data: dict):
