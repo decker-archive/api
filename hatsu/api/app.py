@@ -1,34 +1,22 @@
 import json
-import os
 import dotenv
 import logging
 import quart.flask_patch # type: ignore
-import flask_limiter
 from flask_limiter.util import get_remote_address
 
 from quart import Quart, Response, request
 from .guilds import channels, core as guilds_core
 from .users import me, core as users_core
 from .gateway import connect
+from .rate import rater
 
 app = Quart(__name__)
 dotenv.load_dotenv()
 app.config['debug'] = True
 logging.basicConfig(level=logging.DEBUG)
+rater.init_app(app)
 
-def get_key_func():
-    if request.headers.get('Authorization'):
-        return request.headers.get('Authorization')
-    else:
-        return get_remote_address()
 
-rater = flask_limiter.Limiter(
-    app, 
-    default_limits=['4/second', '40/minute'], 
-    headers_enabled=True, 
-    storage_uri=os.getenv('mongo_uri'),
-    key_func=get_key_func,
-)
 
 @app.route('/')
 async def health_check():
