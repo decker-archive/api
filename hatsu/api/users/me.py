@@ -28,7 +28,7 @@ async def create_user():
     if d['separator'] == 0000:
         return quart.Response(error_bodys['invalid_data'], status=400)
     
-    email_code = invite_code()
+    email_code = await invite_code()
 
     if re.search(email_regex, d.get('email')):
         pass
@@ -62,12 +62,12 @@ async def create_user():
     else:
         r = quart.Response(json.dumps(given), status=201)
         # email.send(f'Welcome to hatsu! Your verification code is: {email_code}')
-        users.insert_one(given)
+        await users.insert_one(given)
         return r
 
 @users_me.post('/verify')
 async def verify_me():
-    user = check_session_(quart.request.headers.get('Authorization'))
+    user = await check_session_(quart.request.headers.get('Authorization'))
     
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
@@ -85,7 +85,7 @@ async def verify_me():
 async def edit_user():
     auth = quart.request.headers.get('Authorization', '')
     allow = False
-    for session_id in users.find({'session_ids': [auth]}):
+    for session_id in await users.find({'session_ids': [auth]}):
         if session_id == quart.request.headers.get('Authorization'):
             allow = True
 
@@ -120,8 +120,8 @@ async def edit_user():
     if given == {}:
         return quart.Response(error_bodys['invalid_data'], 400)
 
-    up = users.find_one({'session_ids': [auth]})
-    users.update_one(up['id'], given)
+    up = await users.find_one({'session_ids': [auth]})
+    await users.update_one(up['id'], given)
 
     return quart.Response(json.loads(given), 200)
 
@@ -130,7 +130,7 @@ async def edit_user():
 async def get_me():
     auth = quart.request.headers.get('Authorization')
     cur = None
-    find = users.find_one({'session_ids': [auth]})
+    find = await users.find_one({'session_ids': [auth]})
 
     try:
         for session_id in find['session_ids']:
@@ -159,7 +159,7 @@ async def get_me():
 async def create_session():
     login: dict = await quart.request.get_json(True)
 
-    u = users.find_one(
+    u = await users.find_one(
         {
             'email': login.get('email', ''),
             'password': get_hash_for(login.get('password', 'nan')),
@@ -171,7 +171,7 @@ async def create_session():
 
     session_id = snowflake_with_blast()
 
-    users.find_one_and_update(
+    await users.find_one_and_update(
         {
             'email': login.get('email'),
             'password': get_hash_for(login.get('password', 'nan')),
@@ -185,7 +185,7 @@ async def create_session():
 async def delete_session(session_id: int):
     login: dict = await quart.request.get_json(True)
 
-    u = users.find_one(
+    u = await users.find_one(
         {
             'email': login.get('email', ''),
             'password': get_hash_for(login.get('password', 'nan')),
@@ -195,5 +195,5 @@ async def delete_session(session_id: int):
     if u == None:
         return quart.Response(error_bodys['no_auth'], status=401)
 
-    users.replace_one({'session_ids': [session_id]}, {'session_ids': []})
+    await users.replace_one({'session_ids': [session_id]}, {'session_ids': []})
     return quart.Response(json.dumps({'completed': True}), 410)

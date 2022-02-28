@@ -35,14 +35,14 @@ def hash_from(snowflake: int = None) -> str:
     else:
         return hashlib.sha1(str(snowflake_with_blast()).encode("utf-8")).hexdigest()
 
-def invite_code() -> str:
+async def invite_code() -> str:
     import secrets
     import re
 
     raw = secrets.token_urlsafe(10)
     raw = re.sub(r"\/|\+|\-|\_", "", raw)
 
-    check = guild_invites.find_one({'code': raw})
+    check = await guild_invites.find_one({'code': raw})
 
     if check != None:
         return invite_code()

@@ -9,3 +9,4 @@ Earl-ETF
 websockets
 zstandard
 verify-email
+motor

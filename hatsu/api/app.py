@@ -21,8 +21,7 @@ rater.init_app(app)
 @app.route('/')
 async def health_check():
     d = {
-        'gateway': 'wss://gateway.vincentrps.xyz',
-        'available': ['1'],
+        'url': 'wss://gateway.vincentrps.xyz',
     }
     return Response(json.dumps(d), 200)
 
@@ -37,18 +36,10 @@ async def after_request(resp: Response):
     return resp
 
 bps = {
-
-    # api v1
-    channels.channels: '/api/v1/guilds',
-    guilds_core.guilds: '/api/v1/guilds',
-    me.users_me: '/api/v1/users/@me',
-    users_core.users: '/api/v1/users',
-
-    # api v2    
-    channels.channels: '/api/v2/guilds',
-    guilds_core.guilds: '/api/v2/guilds',
-    me.users_me: '/api/v2/users/@me',
-    users_core.users: '/api/v2/users',
+    channels.channels: '/api/guilds',
+    guilds_core.guilds: '/api/guilds',
+    me.users_me: '/api/users/@me',
+    users_core.users: '/api/users',
 }
 
 for value, suffix in bps.items():

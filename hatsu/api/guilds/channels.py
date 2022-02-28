@@ -2,7 +2,7 @@ import quart
 import json
 from datetime import timedelta
 
-from ..database import channels, users, members
+from ..database import channels as channels_db, users, members
 from ..data_bodys import error_bodys
 from ..snowflakes import snowflake_with_blast
 from ..gateway import dispatch_event
@@ -14,7 +14,7 @@ channels = quart.Blueprint('channels', __name__)
 @channels.post('/<int:guild_id>/channels')
 async def create_channel(guild_id: int):
     auth = quart.request.headers.get('Authorization')
-    ver = users.find_one({'session_ids': [auth]})
+    ver = await users.find_one({'session_ids': [auth]})
     let = False
 
     for session_id in ver['session_ids']:
@@ -24,7 +24,7 @@ async def create_channel(guild_id: int):
     if let == False:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = members.find_one({'id': ver['id']})
+    member = await members.find_one({'id': ver['id']})
 
     if member == None:
         return quart.Response(error_bodys['not_in_guild'], 403)
@@ -53,7 +53,7 @@ async def create_channel(guild_id: int):
 
     _d = data.copy()
 
-    channels.insert_one(data)
+    await channels_db.insert_one(data)
 
     await dispatch_event('channel_create', _d)
 
@@ -61,14 +61,14 @@ async def create_channel(guild_id: int):
 @channels.get('/channels/<int:channel_id>')
 async def edit_channel(channel_id: int):
     auth = quart.request.headers.get('Authorization')
-    ver = users.find_one({'session_ids': [auth]})
+    ver = await users.find_one({'session_ids': [auth]})
     let = False
 
     for session_id in ver['session_ids']:
         if session_id == auth:
             let = True
     
-    as_member = members.find_one({'id': ver['id']})
+    as_member = await members.find_one({'id': ver['id']})
 
     if as_member == None:
         let = False
@@ -92,7 +92,7 @@ async def edit_channel(channel_id: int):
     if data == {}:
         return quart.Response(error_bodys['invalid_data'], 400)
 
-    channels.update_one({'id': channel_id}, data)
+    await channels_db.update_one({'id': channel_id}, data)
 
     return quart.Response(json.dumps({'success': True}))
 
@@ -100,17 +100,17 @@ async def edit_channel(channel_id: int):
 @channels.delete('/channels/<int:channel_id>')
 async def delete_channel(channel_id: int):
     auth = quart.request.headers.get('Authorization')
-    ver = users.find_one({'session_ids': [auth]})
+    ver = await users.find_one({'session_ids': [auth]})
     let = False
 
     for session_id in ver['session_ids']:
         if session_id == auth:
             let = True
 
-    if members.find_one({'id': ver['id']}) == None:
+    if await members.find_one({'id': ver['id']}) == None:
         let = False
 
-    member_obj = members.find_one({'id': ver['id']})
+    member_obj = await members.find_one({'id': ver['id']})
 
     let = False
 
@@ -121,6 +121,6 @@ async def delete_channel(channel_id: int):
     if let == False:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    channels.delete_one({'id': channel_id})
+    await channels_db.delete_one({'id': channel_id})
 
     return quart.Response(json.dumps({'code': 404}), status=404)

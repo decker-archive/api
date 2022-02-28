@@ -10,7 +10,7 @@ users = quart.Blueprint('users', __name__)
 
 @users.get('/<int:user_id>')
 async def get_user(user_id: int):
-    d = check_session_(quart.request.headers.get('Authorization'))
+    d = await check_session_(quart.request.headers.get('Authorization'))
 
     if d == None:
         return quart.Response(error_bodys['no_auth'], 401)

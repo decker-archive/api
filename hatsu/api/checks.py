@@ -1,8 +1,8 @@
 from .database import users, members
 
 
-def check_session_(session_id):
-    user = users.find_one({'session_ids': [session_id]})
+async def check_session_(session_id):
+    user = await users.find_one({'session_ids': [session_id]})
 
     if user == None:
         return None
@@ -10,8 +10,8 @@ def check_session_(session_id):
         return user
 
 
-def check_if_in_guild(ver):
-    member = members.find_one({'id': ver['id']})
+async def check_if_in_guild(ver):
+    member = await members.find_one({'id': ver['id']})
 
     if member == None:
         return None

@@ -7,7 +7,7 @@ async def connect():
     global ws
     ws = await client.connect('wss://gateway.vincentrps.xyz/', ping_timeout=30, close_timeout=1000000000)
     await ws.send(
-        json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892', 'v': 2})
+        json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
     )
     await check_if_closed()
 
@@ -18,7 +18,7 @@ async def check_if_closed():
         try:
             ws = await client.connect('wss://gateway.vincentrps.xyz', ping_timeout=30)
             await ws.send(
-                json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892', 'v': '2'})
+                json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
             )
         except:
             get_running_loop().create_task(check_if_closed())
