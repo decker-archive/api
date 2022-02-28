@@ -1,10 +1,8 @@
 import json
 import dotenv
 import logging
-import quart.flask_patch # type: ignore
-from flask_limiter.util import get_remote_address
 
-from quart import Quart, Response, request
+from quart import Quart, Response
 from .guilds import channels, core as guilds_core
 from .users import me, core as users_core
 from .gateway import connect
@@ -18,7 +16,7 @@ rater.init_app(app)
 
 
 
-@app.route('/')
+@app.route('/api/ping')
 async def health_check():
     d = {
         'url': 'wss://gateway.vincentrps.xyz',
