@@ -48,7 +48,7 @@ for value, suffix in bps.items():
 
 cfg = hypercorn.config.Config()
 cfg.bind.clear()
-cfg.bind.append('0.0.0.0:443')
+cfg.bind.append('localhost:443')
 
 loop.run_until_complete(hypercorn.asyncio.serve(app, cfg))
 loop.run_forever()
