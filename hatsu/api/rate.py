@@ -1,5 +1,5 @@
 import flask_limiter
-import os
+import quart.flask_patch
 from flask_limiter.util import get_remote_address
 from quart import request
 from dotenv import load_dotenv

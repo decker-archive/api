@@ -1,6 +1,7 @@
 import json
 import dotenv
 import logging
+import quart.flask_patch
 
 from quart import Quart, Response
 from .guilds import channels, core as guilds_core
