@@ -146,6 +146,8 @@ async def edit_guild(guild_id: int):
 
     await guilds_db.update_one({'id': guild_id}, data)
 
+    await guild_dispatch(guild['id'], 'GUILD_UPDATE', d)
+
     return quart.Response(d, 200)
 
 @guilds.delete('/<int:guild_id>')
@@ -170,6 +172,8 @@ async def delete_guild(guild_id: int):
     await guilds_db.delete_one({'id': guild_id})
     await members.delete_many({'guild_id': guild_id})
     await channels.delete_many({'guild_id': guild_id})
+
+    await guild_dispatch(guild['id'], 'GUILD_DELETE', None)
 
     return quart.Response(error_bodys['no_content'], 204)
 

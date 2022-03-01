@@ -72,7 +72,7 @@ async def verify_me():
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
     
-    d: dict = quart.request.get_json(True)
+    d: dict = await quart.request.get_json(True)
 
     code = d.get('code', '')
 
@@ -113,7 +113,7 @@ async def edit_user():
 
     if d.get('password'):
         given['password'] = get_hash_for(d.pop('password'))
-    
+
     if d.get('bio'):
         given['bio'] = d.pop('bio')
 
