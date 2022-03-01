@@ -85,7 +85,7 @@ async def verify_me():
 async def edit_user():
     auth = quart.request.headers.get('Authorization', '')
     allow = False
-    for session_id in await users.find({'session_ids': [auth]}):
+    for session_id in users.find({'session_ids': [auth]}):
         if session_id == quart.request.headers.get('Authorization'):
             allow = True
 

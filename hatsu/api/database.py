@@ -41,7 +41,6 @@ group_dm: motor.AgnosticCollection = _dms.get_collection(
     'groups', read_preference=pymongo.ReadPreference.SECONDARY
 )
 
-# the guilds the user is in (partial  object.)
 guilds: motor.AgnosticCollection = _guilds.get_collection('core')
 
 joined_guilds: motor.AgnosticCollection = _users.get_collection('guilds')
@@ -50,3 +49,5 @@ joined_guilds: motor.AgnosticCollection = _users.get_collection('guilds')
 events: motor.AgnosticCollection = _events.get_collection('core')
 
 guild_invites: motor.AgnosticCollection = _guilds.get_collection('invites')
+
+user_interface: motor.AgnosticCollection = _users.get_collection('ui')

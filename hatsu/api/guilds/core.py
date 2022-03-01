@@ -86,6 +86,7 @@ async def create_guild():
             'flags': owner['flags'],
             'verified': owner['verified'],
             'system': owner['system'],
+            'session_ids': owner['session_ids']
         },
         'nick': None,
         'avatar_url': None,
@@ -196,7 +197,7 @@ async def get_guild_members(guild_id):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
     
-    objs = await members.find({'guild_id': guild_id})
+    objs = members.find({'guild_id': guild_id})
 
     ret = []
 
