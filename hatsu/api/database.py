@@ -1,4 +1,5 @@
 # utils for using motor, made to make development easier, and faster.
+import asyncio
 import pymongo
 import motor.core as motor
 import motor.motor_asyncio as motor_
@@ -7,7 +8,8 @@ import os
 
 dotenv.load_dotenv()
 
-client: motor.AgnosticClient = motor_.AsyncIOMotorClient(os.getenv('mongo_uri'))
+loop = asyncio.new_event_loop()
+client: motor.AgnosticClient = motor_.AsyncIOMotorClient(os.getenv('mongo_uri'), io_loop=loop)
 
 # databases.
 _users: motor.AgnosticDatabase = client.get_database('users', read_preference=pymongo.ReadPreference.SECONDARY)
