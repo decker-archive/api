@@ -42,11 +42,4 @@ bps = {
 
 for value, suffix in bps.items():
 
-    if value.name == 'guilds':
-        rater.limit('10/second')(value)
-    elif value.name == 'users_me':
-        rater.limit('5/second')(value)
-    else:
-        rater.limit('7/second')(value)
-
     app.register_blueprint(value, url_prefix=suffix)

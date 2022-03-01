@@ -13,7 +13,7 @@ def get_key_func():
         return get_remote_address()
 
 rater = flask_limiter.Limiter(
-    default_limits=['4/second', '40/minute'], 
+    default_limits=['10/second', '40/minute'], 
     headers_enabled=True, 
     key_func=get_key_func,
 )
