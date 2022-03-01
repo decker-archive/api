@@ -16,7 +16,7 @@ rater.init_app(app)
 
 
 
-@app.route('/api/ping')
+@app.route('/gateway')
 async def health_check():
     d = {
         'url': 'wss://gateway.vincentrps.xyz',
@@ -34,12 +34,11 @@ async def after_request(resp: Response):
     return resp
 
 bps = {
-    channels.channels: '/api/guilds',
-    guilds_core.guilds: '/api/guilds',
-    me.users_me: '/api/users/@me',
-    users_core.users: '/api/users',
+    channels.channels: '/guilds',
+    guilds_core.guilds: '/guilds',
+    me.users_me: '/users/@me',
+    users_core.users: '/users',
 }
 
 for value, suffix in bps.items():
-
     app.register_blueprint(value, url_prefix=suffix)
