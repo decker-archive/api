@@ -18,6 +18,7 @@ app.config['debug'] = True
 logging.basicConfig(level=logging.DEBUG)
 rater.init_app(app)
 
+
 @app.route('/gateway')
 async def health_check():
     d = {
@@ -28,6 +29,7 @@ async def health_check():
 
 app.before_serving(connect)
 
+
 @app.after_request
 async def after_request(resp: Response):
     if rater.current_limit:
@@ -35,6 +37,7 @@ async def after_request(resp: Response):
         retry = resp.headers.pop('Retry-After', '0')
         resp.headers.add('X-RateLimit-Retry-After', retry)
     return resp
+
 
 bps = {
     channels.channels: '/guilds',

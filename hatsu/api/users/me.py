@@ -12,7 +12,8 @@ from ..rate import rater
 users_me = quart.Blueprint('users_me', __name__)
 
 # regex for emails
-email_regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$' 
+email_regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+
 
 @users_me.post('')
 @rater.limit('1/hour')
@@ -27,15 +28,15 @@ async def create_user():
 
     if d['separator'] == 0000:
         return quart.Response(error_bodys['invalid_data'], status=400)
-    
+
     email_code = await invite_code()
 
     if re.search(email_regex, d.get('email')):
         pass
     else:
         return quart.Response(error_bodys['invalid_data'], status=400)
-    
-    true = verify_email.verify_email(d.get('email',''), debug=True)
+
+    true = verify_email.verify_email(d.get('email', ''), debug=True)
 
     if true == False:
         return quart.Response(error_bodys['invalid_data'], status=400)
@@ -55,7 +56,7 @@ async def create_user():
             'system': False,
             'email_verified': False,
             'session_ids': [str(snowflake_with_blast())],
-            'email_code': email_code
+            'email_code': email_code,
         }
     except KeyError:
         return quart.Response(body=error_bodys['invalid_data'], status=400)
@@ -65,13 +66,14 @@ async def create_user():
         await users.insert_one(given)
         return r
 
+
 @users_me.post('/verify')
 async def verify_me():
     user = await check_session_(quart.request.headers.get('Authorization'))
-    
+
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
-    
+
     d: dict = await quart.request.get_json(True)
 
     code = d.get('code', '')
@@ -79,7 +81,6 @@ async def verify_me():
     if code != user['email_code']:
         return quart.Response(error_bodys['no_perms'], 403)
 
-    
 
 @users_me.patch('')
 async def edit_user():

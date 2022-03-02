@@ -9,10 +9,14 @@ import os
 dotenv.load_dotenv()
 
 loop = asyncio.new_event_loop()
-client: motor.AgnosticClient = motor_.AsyncIOMotorClient(os.getenv('mongo_uri'), io_loop=loop)
+client: motor.AgnosticClient = motor_.AsyncIOMotorClient(
+    os.getenv('mongo_uri'), io_loop=loop
+)
 
 # databases.
-_users: motor.AgnosticDatabase = client.get_database('users', read_preference=pymongo.ReadPreference.SECONDARY)
+_users: motor.AgnosticDatabase = client.get_database(
+    'users', read_preference=pymongo.ReadPreference.SECONDARY
+)
 _guilds: motor.AgnosticDatabase = client.get_database(
     'guilds', read_preference=pymongo.ReadPreference.SECONDARY
 )
@@ -22,7 +26,9 @@ _dms: motor.AgnosticDatabase = client.get_database(
 _events: motor.AgnosticDatabase = client.get_database('events')
 
 # users, core
-users: motor.AgnosticCollection = _users.get_collection('core', read_preference=pymongo.ReadPreference.SECONDARY)
+users: motor.AgnosticCollection = _users.get_collection(
+    'core', read_preference=pymongo.ReadPreference.SECONDARY
+)
 
 # guilds
 members: motor.AgnosticCollection = _guilds.get_collection(

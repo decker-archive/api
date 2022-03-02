@@ -67,7 +67,7 @@ async def edit_channel(channel_id: int):
     for session_id in ver['session_ids']:
         if session_id == auth:
             let = True
-    
+
     as_member = await members.find_one({'id': ver['id']})
 
     if as_member == None:

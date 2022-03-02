@@ -41,6 +41,7 @@ class _RawBitPerms(ctypes.BigEndianStructure):
         ("manage_emojis", _i, 1),
     ]
 
+
 class Permissions(ctypes.Union):
 
     _fields_ = [('bits', _RawBitPerms), {'binary', ctypes.c_uint64}]
@@ -48,8 +49,10 @@ class Permissions(ctypes.Union):
     def __init__(self, val: Union[int, str]):
         self.binary = int(val)
 
+
 ALL_PERMS = Permissions(0b01111111111111111111111111111111)
 NO_PERMS = Permissions(0)
+
 
 def get_role_perms():
     ...
