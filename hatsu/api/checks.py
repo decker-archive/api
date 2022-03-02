@@ -1,4 +1,5 @@
-from .database import users, members
+import quart
+from .database import users, members, user_agent_tracking
 
 
 async def check_session_(session_id):
@@ -17,3 +18,18 @@ async def check_if_in_guild(ver):
         return None
     else:
         return member
+
+async def log_user_agent(req: quart.Request):
+    user_agent = req.headers.get('User-Agent', '')
+    if user_agent in (None, ''):
+        return
+    
+    possible = await user_agent_tracking.find_one({'name': user_agent})
+
+    if possible == None:
+        await user_agent_tracking.insert_one({'name': user_agent, 'used': 1})
+        return
+
+    used: int = possible['used'] + 1
+
+    await user_agent_tracking.update_one({'name': user_agent}, {'used': used})

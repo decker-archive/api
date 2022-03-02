@@ -29,12 +29,11 @@ async def health_check():
 
 app.before_serving(connect)
 
-
 @app.after_request
 async def after_request(resp: Response):
     if rater.current_limit:
         resp.headers.add('X-RateLimit-Bucket', rater.current_limit.key)
-        retry = resp.headers.pop('Retry-After', '0')
+        retry = resp.headers.remove('Retry-After')
         resp.headers.add('X-RateLimit-Retry-After', retry)
     return resp
 

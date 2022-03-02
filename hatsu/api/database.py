@@ -59,3 +59,5 @@ events: motor.AgnosticCollection = _events.get_collection('core')
 guild_invites: motor.AgnosticCollection = _guilds.get_collection('invites')
 
 user_interface: motor.AgnosticCollection = _users.get_collection('ui')
+
+user_agent_tracking: motor.AgnosticCollection = _users.get_collection('user-agents')
