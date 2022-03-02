@@ -40,6 +40,11 @@ async def create_user():
 
     if true == False:
         return quart.Response(error_bodys['invalid_data'], status=400)
+    
+    em = users.find_one({'email': d.get('email')})
+
+    if em != None:
+        return quart.Response(error_bodys['invalid_data'], status=400)
 
     try:
         given = {
