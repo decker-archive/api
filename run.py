@@ -16,6 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import os
+import time
+
 #  --keyfile key.pem --certfile cert.pem
 # --bind 0.0.0.0:443
+
+time.sleep(10)
 os.system('hypercorn --bind 0.0.0.0:443 hatsu.api.app:app')
