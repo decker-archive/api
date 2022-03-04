@@ -1,7 +1,7 @@
 import datetime
 import hashlib
-from .database import guild_invites
-from snowflake import SnowflakeGenerator
+# from .database import guild_invites
+from .couped.snowflake import snowflake
 
 seq = 0
 instance = 0
@@ -9,25 +9,7 @@ instance = 0
 
 def snowflake_with_blast() -> int:
     """Ensures a Snowflakes safe creation, while being original to it's format"""
-    global instance
-    global seq
-
-    if seq == 4095:
-        seq = 0
-
-    if instance == 1023:
-        instance = 0
-
-    seq += 1
-    instance += 1
-
-    return SnowflakeGenerator(
-        instance=instance,
-        epoch=int(1262304001),
-        seq=int(seq),
-        timestamp=datetime.datetime.now(datetime.timezone.utc).timestamp(),
-    ).__next__()
-
+    return snowflake()
 
 def hash_from(snowflake: int = None) -> str:
     """Creates a hash from a snowflake"""
@@ -44,9 +26,12 @@ async def invite_code() -> str:
     raw = secrets.token_urlsafe(10)
     raw = re.sub(r"\/|\+|\-|\_", "", raw)
 
-    check = await guild_invites.find_one({'code': raw})
+    # check = await guild_invites.find_one({'code': raw})
+    check = None
 
     if check != None:
-        return invite_code()
+        return await invite_code()
 
     return raw[:7]
+
+print(snowflake_with_blast())

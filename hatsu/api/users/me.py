@@ -4,7 +4,7 @@ import re
 import verify_email
 from ..snowflakes import snowflake_with_blast, invite_code
 from ..data_bodys import error_bodys
-from ..database import users
+from ..database import users, user_settings
 from ..encrypt import get_hash_for
 from ..checks import check_session_
 from ..rate import rater
@@ -46,9 +46,11 @@ async def create_user():
     if em != None:
         return quart.Response(error_bodys['invalid_data'], status=400)
 
+    _id = snowflake_with_blast()
+
     try:
         given = {
-            'id': snowflake_with_blast(),
+            'id': _id,
             'username': d['username'],
             'separator': d['separator'],
             'bio': d.get('bio', ''),
@@ -62,11 +64,13 @@ async def create_user():
             'email_verified': False,
             'session_ids': [str(snowflake_with_blast())],
             'email_code': email_code,
+            'blocked_users': []
         }
     except KeyError:
         return quart.Response(body=error_bodys['invalid_data'], status=400)
     else:
         r = quart.Response(json.dumps(given), status=201)
+        await user_settings.insert_one({'id': _id, 'accept_friend_requests': True})
         # email.send(f'Welcome to hatsu! Your verification code is: {email_code}')
         await users.insert_one(given)
         return r
@@ -91,7 +95,7 @@ async def verify_me():
 async def edit_user():
     auth = quart.request.headers.get('Authorization', '')
     allow = False
-    for session_id in users.find({'session_ids': [auth]}):
+    async for session_id in users.find({'session_ids': [auth]}):
         if session_id == quart.request.headers.get('Authorization'):
             allow = True
 
@@ -107,6 +111,7 @@ async def edit_user():
             return quart.Response(error_bodys['invalid_data'], 400)
 
     given = {}
+    up = await users.find_one({'session_ids': [auth]})
 
     if d.get('username'):
         given['username'] = d.pop('username')
@@ -122,15 +127,49 @@ async def edit_user():
 
     if d.get('bio'):
         given['bio'] = d.pop('bio')
+    
+    if d.get('accept_friend_requests'):
+        await user_settings.update_one({'id': up['id']}, {'accept_friend_requests': bool(d.pop('accept_friend_requests'))})
 
     if given == {}:
         return quart.Response(error_bodys['invalid_data'], 400)
 
-    up = await users.find_one({'session_ids': [auth]})
-    await users.update_one(up['id'], given)
+    await users.update_one({'id': up['id']}, given)
 
     return quart.Response(json.loads(given), 200)
 
+@users_me.post('/blocks/<int:user_id>')
+async def block_user(user_id: int):
+    user = await check_session_(quart.request.headers.get('Authorization'))
+
+    if user == None:
+        return quart.Response(error_bodys['no_auth'], 401)
+    
+    to = await users.find_one({'id': user_id})
+
+    if to == None:
+        return quart.Response(error_bodys['not_found'], 404)
+    
+    await users.update_one({'id': user['id']}, {'blocked_users': [user_id]})
+
+    return quart.Response(error_bodys['no_content'], 204)
+
+@users_me.delete('/blocks/<int:user_id>')
+async def unblock_user(user_id: int):
+    user = await check_session_(quart.request.headers.get('Authorization'))
+
+    if user == None:
+        return quart.Response(error_bodys['no_auth'], 401)
+    
+    to = await users.find_one({'id': user_id})
+
+    if to == None:
+        return quart.Response(error_bodys['not_found'], 404)
+    
+    if to['id'] not in user['blocked_users']:
+        return quart.Response(error_bodys['no_perms'], 403)
+    
+    await users
 
 @users_me.get('')
 async def get_me():

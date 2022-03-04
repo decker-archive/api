@@ -211,7 +211,7 @@ async def get_guild_members(guild_id):
 
     ret = []
 
-    for _obj in objs:
+    async for _obj in objs:
         _obj.pop('guild_id')
         _obj['user'].pop('session_ids')
         ret.append(_obj)

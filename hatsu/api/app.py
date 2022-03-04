@@ -11,6 +11,7 @@ from .users import me, core as users_core
 from .gateway import connect
 from .rate import rater
 from .database import loop
+from .ui import friends
 
 app = Quart(__name__)
 dotenv.load_dotenv()
@@ -33,16 +34,15 @@ app.before_serving(connect)
 async def after_request(resp: Response):
     if rater.current_limit:
         resp.headers.add('X-RateLimit-Bucket', rater.current_limit.key)
-        retry = resp.headers.remove('Retry-After')
-        resp.headers.add('X-RateLimit-Retry-After', retry)
     return resp
 
 
 bps = {
-    channels.channels: '/guilds',
-    guilds_core.guilds: '/guilds',
-    me.users_me: '/users/@me',
+    channels.channels: '/api/guilds',
+    guilds_core.guilds: '/api/guilds',
+    me.users_me: '/api/users/@me',
     users_core.users: '/users',
+    friends.ui: '/api/ui/friends',
 }
 
 for value, suffix in bps.items():

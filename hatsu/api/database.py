@@ -51,8 +51,6 @@ group_dm: motor.AgnosticCollection = _dms.get_collection(
 
 guilds: motor.AgnosticCollection = _guilds.get_collection('core')
 
-joined_guilds: motor.AgnosticCollection = _users.get_collection('guilds')
-
 # core events
 events: motor.AgnosticCollection = _events.get_collection('core')
 
@@ -61,3 +59,7 @@ guild_invites: motor.AgnosticCollection = _guilds.get_collection('invites')
 user_interface: motor.AgnosticCollection = _users.get_collection('ui')
 
 user_agent_tracking: motor.AgnosticCollection = _users.get_collection('user-agents')
+
+user_settings: motor.AgnosticCollection = _users.get_collection('settings')
+
+friends: motor.AgnosticCollection = _users.get_collection('friends')
