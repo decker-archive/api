@@ -33,5 +33,3 @@ async def invite_code() -> str:
         return await invite_code()
 
     return raw[:7]
-
-print(snowflake_with_blast())
