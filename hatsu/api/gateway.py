@@ -6,7 +6,7 @@ from asyncio import get_running_loop, sleep
 async def connect():
     global ws
     ws = await client.connect(
-        'wss://gateway.vincentrps.xyz/', ping_timeout=30, close_timeout=1000000000
+        'wss://gateway.vincentrps.xyz:5000', ping_timeout=30, close_timeout=1000000000
     )
     await ws.send(
         json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
@@ -19,7 +19,7 @@ async def check_if_closed():
     global ws
     if ws.closed:
         try:
-            ws = await client.connect('wss://gateway.vincentrps.xyz', ping_timeout=30)
+            ws = await client.connect('wss://gateway.vincentrps.xyz:5000', ping_timeout=30)
             await ws.send(
                 json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
             )
