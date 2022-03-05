@@ -5,8 +5,7 @@ python-dotenv
 quart
 hypercorn
 Flask-Limiter
-Earl-ETF
 websockets
-zstandard
 verify-email
 motor
+requests
