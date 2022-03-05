@@ -1,4 +1,5 @@
 import json
+import requests
 from websockets import client
 from asyncio import get_running_loop, sleep
 
@@ -6,23 +7,18 @@ from asyncio import get_running_loop, sleep
 async def connect():
     print('Connecting to the Gateway')
     global used_port
-    _porter = await client.connect(
-        'wss://gateway.vincentrps.xyz:443'
+    _porter = requests.get(
+        'wss://gateway.vincentrps.xyz/port'
     )
-    await _porter.send(json.dumps({'ping': 'pong'}))
-
-    while True:
-        r = await _porter.recv()
-        d = json.loads(r)
-        used_port = d['url']
-        break
+    used_port = _porter.json()['port']
 
     await real_connect()
 
 async def real_connect():
     global ws
     ws = await client.connect(
-        used_port, ping_timeout=20,
+        'wss://gateway.vincentrps.xyz:' + used_port, 
+        ping_timeout=20,
     )
     await ws.send(
         json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
@@ -36,7 +32,7 @@ async def check_if_closed():
     global ws
     if not ws or ws.closed:
         try:
-            ws = await client.connect(used_port, ping_timeout=20)
+            ws = await client.connect('wss://gateway.vincentrps.xyz:' + used_port, ping_timeout=20)
             await ws.send(
                 json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
             )
