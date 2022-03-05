@@ -10,7 +10,6 @@ async def connect():
         'wss://gateway.vincentrps.xyz:5000', ping_timeout=30, close_timeout=1000000000
         )
     except TimeoutError:
-        ws = None
         ws.closed = True
         await check_if_closed()
         return
