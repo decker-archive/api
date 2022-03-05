@@ -8,7 +8,7 @@ async def connect():
     print('Connecting to the Gateway')
     global used_port
     _porter = requests.get(
-        'wss://gateway.vincentrps.xyz/port'
+        'https://gateway.vincentrps.xyz/port'
     )
     used_port = _porter.json()['port']
 
