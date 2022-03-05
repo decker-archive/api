@@ -10,7 +10,7 @@ async def connect():
     _porter = requests.get(
         'https://gateway.vincentrps.xyz/port'
     )
-    used_port = _porter.json()['port']
+    used_port = str(_porter.json()['port'])
 
     await real_connect()
 

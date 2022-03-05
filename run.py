@@ -21,5 +21,5 @@ import time
 #  --keyfile key.pem --certfile cert.pem
 # --bind 0.0.0.0:443
 
-time.sleep(10)
+time.sleep(20)
 os.system('hypercorn --bind 0.0.0.0:443 hatsu.api.app:app')
