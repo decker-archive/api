@@ -1,13 +1,16 @@
 import json
 from websockets import client
-from asyncio import get_running_loop, sleep
+from asyncio import get_running_loop, sleep, TimeoutError
 
 
 async def connect():
     global ws
-    ws = await client.connect(
+    try:
+        ws = await client.connect(
         'wss://gateway.vincentrps.xyz:5000', ping_timeout=30, close_timeout=1000000000
-    )
+        )
+    except TimeoutError:
+        return await connect()
     await ws.send(
         json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
     )
