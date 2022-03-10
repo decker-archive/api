@@ -1,24 +1,19 @@
 import json
-import requests
+import aiohttp
 from websockets import client
 from asyncio import get_running_loop, sleep
 
 
 async def connect():
-    print('Connecting to the Gateway')
-    global used_port
-    _porter = requests.get(
-        'https://gateway.vincentrps.xyz/port'
-    )
-    used_port = str(_porter.json()['port'])
-
-    await real_connect()
+    return await real_connect()
 
 async def real_connect():
     global ws
+    print(f'Connecting to wss://gateway-prod-1.vincentrps.xyz')
     ws = await client.connect(
-        'wss://gateway.vincentrps.xyz:' + used_port, 
+        'wss://gateway-prod-1.vincentrps.xyz',
         ping_timeout=20,
+        close_timeout=10000000
     )
     await ws.send(
         json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
@@ -32,7 +27,7 @@ async def check_if_closed():
     global ws
     if not ws or ws.closed:
         try:
-            ws = await client.connect('wss://gateway.vincentrps.xyz:' + used_port, ping_timeout=20)
+            ws = await client.connect('wss://gateway-prod-1.vincentrps.xyz', ping_timeout=20)
             await ws.send(
                 json.dumps({'session_id': 'adb8ddecad0ec633da6651a1b441026fdc646892'})
             )

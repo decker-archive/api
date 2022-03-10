@@ -27,15 +27,11 @@ async def health_check():
     }
     return Response(json.dumps(d), 200)
 
-
-app.before_serving(connect)
-
 @app.after_request
 async def after_request(resp: Response):
     if rater.current_limit:
         resp.headers.add('X-RateLimit-Bucket', rater.current_limit.key)
     return resp
-
 
 bps = {
     channels.channels: '/api/guilds',
@@ -50,7 +46,8 @@ for value, suffix in bps.items():
 
 cfg = hypercorn.config.Config()
 cfg.bind.clear()
-cfg.bind.append('0.0.0.0:443')
+cfg.bind.append('localhost:1111')
 
+loop.create_task(connect())
 loop.run_until_complete(hypercorn.asyncio.serve(app, cfg))
 loop.run_forever()

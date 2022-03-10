@@ -1,6 +1,5 @@
 import quart
 import json
-from datetime import timedelta
 from ..database import users as users_db
 from ..data_bodys import error_bodys
 from ..checks import check_session_
@@ -18,7 +17,7 @@ async def get_user(user_id: int):
     user = users_db.find_one({'id': user_id})
 
     if user == None:
-        return quart.Response(error_bodys['invalid_data'], 400)
+        return quart.Response(error_bodys['not_found'], 404)
 
     # filter out non-public info, like session_ids
     user_data = {

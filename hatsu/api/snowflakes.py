@@ -7,9 +7,9 @@ seq = 0
 instance = 0
 
 
-def snowflake_with_blast() -> int:
+def snowflake_with_blast():
     """Ensures a Snowflakes safe creation, while being original to it's format"""
-    return snowflake()
+    return str(snowflake())
 
 def hash_from(snowflake: int = None) -> str:
     """Creates a hash from a snowflake"""

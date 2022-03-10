@@ -6,6 +6,5 @@ quart
 hypercorn
 Flask-Limiter
 websockets
-verify-email
 motor
-requests
+aiohttp

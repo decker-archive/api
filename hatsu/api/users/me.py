@@ -1,7 +1,6 @@
 import json
 import quart
 import re
-import verify_email
 from ..snowflakes import snowflake_with_blast, invite_code
 from ..data_bodys import error_bodys
 from ..database import users, user_settings
@@ -34,11 +33,6 @@ async def create_user():
     if re.search(email_regex, d.get('email')):
         pass
     else:
-        return quart.Response(error_bodys['invalid_data'], status=400)
-
-    true = verify_email.verify_email(d.get('email', ''), debug=True)
-
-    if true == False:
         return quart.Response(error_bodys['invalid_data'], status=400)
     
     em = users.find_one({'email': d.get('email')})
