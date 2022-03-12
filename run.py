@@ -15,11 +15,8 @@
 # ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⢿⣿⣿⣿⣿⣿⣿⠿⠋⠉⠛⠋⠉⠉⠁⠀⠀⠀⠀
 # ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠁
 import os
-import time
+from dotenv import load_dotenv
 
-#  --keyfile key.pem --certfile cert.pem
-# --bind 0.0.0.0:443
+load_dotenv()
 
-time.sleep(20)
-
-os.system('hypercorn --bind 0.0.0.0:443 hatsu.api.app:app')
+os.system(f'hypercorn --bind 0.0.0.0:{os.getenv("PORT")} hatsu.api.app:app')
