@@ -35,11 +35,11 @@ async def after_request(resp: Response):
     return resp
 
 @app.errorhandler(404)
-async def not_found():
+async def not_found(*_):
     return json.dumps({'code': 0, 'message': '404: Not Found'})
 
 @app.errorhandler(500)
-async def internal():
+async def internal(*_):
     return json.dumps({'code': 0, 'message': '500: Internal Server Error'})
 
 bps = {
