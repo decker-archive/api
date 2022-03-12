@@ -34,6 +34,14 @@ async def after_request(resp: Response):
         resp.headers.add('X-RateLimit-Bucket', rater.current_limit.key)
     return resp
 
+@app.errorhandler(404)
+async def not_found():
+    return json.dumps({'code': 0, 'message': '404: Not Found'})
+
+@app.errorhandler(500)
+async def internal():
+    return json.dumps({'code': 0, 'message': '500: Internal Server Error'})
+
 bps = {
     channels.channels: '/v2/guilds',
     guilds_core.guilds: '/v2/guilds',
