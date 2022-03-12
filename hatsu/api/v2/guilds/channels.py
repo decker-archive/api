@@ -5,7 +5,7 @@ from datetime import timedelta
 from ..database import channels as channels_db, users, members
 from ..data_bodys import error_bodys
 from ..snowflakes import snowflake_with_blast
-from ..gateway import dispatch_event
+from ...gateway import dispatch_event
 
 app = quart.current_app
 channels = quart.Blueprint('channels', __name__)

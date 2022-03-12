@@ -1,4 +1,4 @@
-from ..gateway import send_notification
+from ...gateway import send_notification
 
 async def send_friend_notification(requester: int, friender: int, request: bool):
     if request:

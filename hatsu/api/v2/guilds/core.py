@@ -6,7 +6,7 @@ from ..checks import check_session_
 from ..data_bodys import error_bodys
 from ..database import guilds as guilds_db, channels, members, guild_invites
 from ..snowflakes import snowflake_with_blast, invite_code
-from ..gateway import dispatch_event_to, guild_dispatch
+from ...gateway import dispatch_event_to, guild_dispatch
 
 guilds = quart.Blueprint('guilds', __name__)
 

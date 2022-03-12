@@ -1,17 +1,18 @@
 import json
 import dotenv
 import logging
+import os
 import hypercorn.asyncio
 import hypercorn.config
 import quart.flask_patch
 
 from quart import Quart, Response
-from .guilds import channels, core as guilds_core
-from .users import me, core as users_core
-from .gateway import connect
-from .rate import rater
-from .database import loop
-from .ui import friends
+from .api.v2.guilds import channels, core as guilds_core
+from .api.v2.users import me, core as users_core
+from .api.gateway import connect
+from .api.v2.rate import rater
+from .api.v2.database import loop
+from .api.v2.ui import friends
 
 app = Quart(__name__)
 dotenv.load_dotenv()
@@ -34,11 +35,11 @@ async def after_request(resp: Response):
     return resp
 
 bps = {
-    channels.channels: '/api/guilds',
-    guilds_core.guilds: '/api/guilds',
-    me.users_me: '/api/users/@me',
-    users_core.users: '/users',
-    friends.ui: '/api/ui/friends',
+    channels.channels: '/v2/guilds',
+    guilds_core.guilds: '/v2/guilds',
+    me.users_me: '/v2/users/@me',
+    users_core.users: '/v2/users',
+    friends.ui: '/v2/ui/friends',
 }
 
 for value, suffix in bps.items():
@@ -46,7 +47,7 @@ for value, suffix in bps.items():
 
 cfg = hypercorn.config.Config()
 cfg.bind.clear()
-cfg.bind.append('localhost:1111')
+cfg.bind.append(f'0.0.0.0:{os.getenv("PORT")}')
 
 loop.create_task(connect())
 loop.run_until_complete(hypercorn.asyncio.serve(app, cfg))

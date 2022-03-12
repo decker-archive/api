@@ -19,4 +19,4 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-os.system(f'hypercorn --bind 0.0.0.0:{os.getenv("PORT")} hatsu.api.app:app')
+os.system(f'hypercorn --bind 0.0.0.0:{os.getenv("PORT")} hatsu.core:app')

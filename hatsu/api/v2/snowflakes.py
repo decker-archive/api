@@ -1,7 +1,7 @@
 import datetime
 import hashlib
 # from .database import guild_invites
-from .couped.snowflake import snowflake
+from ..couped.snowflake import snowflake
 
 seq = 0
 instance = 0
