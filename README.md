@@ -1,2 +1,2 @@
-# hatsu
-The REST API and soon to be Gateway of okemia.
+# vercal/api
+The vertically assended api of the vercal chatting platform.
