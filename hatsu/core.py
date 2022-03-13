@@ -10,7 +10,7 @@ from quart import Quart, Response
 from .api.v2.guilds import channels, core as guilds_core
 from .api.v2.users import me, core as users_core
 from .api.gateway import connect
-from .api.v2.rate import rater
+from .api.v2.rate import rater, _reset
 from .api.v2.database import loop
 from .api.v2.ui import friends
 
@@ -28,19 +28,28 @@ async def health_check():
     }
     return Response(json.dumps(d), 200)
 
-@app.after_request
-async def after_request(resp: Response):
-    if rater.current_limit:
-        resp.headers.add('X-RateLimit-Bucket', rater.current_limit.key)
-    return resp
-
 @app.errorhandler(404)
 async def not_found(*_):
-    return json.dumps({'code': 0, 'message': '404: Not Found'})
+    return json.dumps({'message': '404: Not Found', 'code': 0})
 
 @app.errorhandler(500)
 async def internal(*_):
-    return json.dumps({'code': 0, 'message': '500: Internal Server Error'})
+    return json.dumps({'message': '500: Internal Server Error', 'code': 0})
+
+@app.errorhandler(429)
+async def ratelimited(*_):
+    return json.dumps({'message': '429: Too Many Requests', 'retry_after': rater.current_limit.reset_at})
+
+@app.after_request
+async def set_ratelimit(resp: Response):
+    if rater.current_limit:
+        resp.headers.add('X-RateLimit-Limit', rater.current_limit.limit)
+        resp.headers.add('X-RateLimit-Remaining', rater.current_limit.remaining)
+        resp.headers.add('X-RateLimit-Breached', str(rater.current_limit.breached))
+        resp.headers.add('X-RateLimit-Bucket', rater._key_func())
+        resp.headers.add('X-RateLimit-Reset-After', rater.current_limit.reset_at)
+    resp.headers['Content-Type'] = 'application/json'
+    return resp
 
 bps = {
     channels.channels: '/v2/guilds',
