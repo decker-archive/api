@@ -12,7 +12,7 @@ keys: Dict[str, str] = {}
 
 def get_key_func():
     try:
-        compat = request.method + ':' + request.endpoint
+        compat = request.method + ':' + request.endpoint + ':' + request.remote_addr
     except:
         abort(404)
     for k, v in keys.items():
