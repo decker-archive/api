@@ -67,5 +67,6 @@ cfg.bind.clear()
 cfg.bind.append(f'0.0.0.0:{os.getenv("PORT")}')
 
 loop.create_task(connect())
+loop.create_task(_reset())
 loop.run_until_complete(hypercorn.asyncio.serve(app, cfg))
 loop.run_forever()
