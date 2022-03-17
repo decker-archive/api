@@ -4,7 +4,7 @@ import logging
 import os
 import hypercorn.asyncio
 import hypercorn.config
-import quart.flask_patch
+import quart.flask_patch # type: ignore
 
 from quart import Quart, Response
 from .api.v2.guilds import channels, core as guilds_core
