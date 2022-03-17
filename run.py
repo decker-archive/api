@@ -19,4 +19,4 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-os.system(f'newrelic-admin run-program hypercorn --bind 0.0.0.0:{os.getenv("PORT")} rails.core:app')
+os.system(f'hypercorn --bind 0.0.0.0:{os.getenv("PORT")} rails.core:app')
