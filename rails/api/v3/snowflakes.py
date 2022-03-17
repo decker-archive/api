@@ -1,6 +1,6 @@
 import datetime
 import hashlib
-# from .database import guild_invites
+from .database import guild_invites
 from ..couped.snowflake import snowflake
 
 seq = 0
@@ -26,8 +26,7 @@ async def invite_code() -> str:
     raw = secrets.token_urlsafe(10)
     raw = re.sub(r"\/|\+|\-|\_", "", raw)
 
-    # check = await guild_invites.find_one({'code': raw})
-    check = None
+    check = await guild_invites.find_one({'code': raw})
 
     if check != None:
         return await invite_code()

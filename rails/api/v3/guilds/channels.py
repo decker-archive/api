@@ -1,8 +1,8 @@
 import quart
 import json
-from datetime import timedelta
 
-from ..database import channels as channels_db, users, members
+from ..permissions import Permissions
+from ..database import channels as channels_db, users, members, guilds
 from ..data_bodys import error_bodys
 from ..snowflakes import snowflake_with_blast
 from ...gateway import dispatch_event
@@ -28,6 +28,9 @@ async def create_channel(guild_id: int):
 
     if member == None:
         return quart.Response(error_bodys['not_in_guild'], 403)
+
+    if member['roles'] == []:
+        v = guilds.find_one()
 
     d: dict = await quart.request.get_json()
 

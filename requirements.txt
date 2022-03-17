@@ -8,3 +8,4 @@ Flask-Limiter
 websockets
 motor
 aiohttp
+newrelic

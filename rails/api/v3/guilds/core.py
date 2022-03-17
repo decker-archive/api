@@ -7,6 +7,7 @@ from ..data_bodys import error_bodys
 from ..database import guilds as guilds_db, channels, members, guild_invites
 from ..snowflakes import snowflake_with_blast, invite_code
 from ...gateway import dispatch_event_to, guild_dispatch
+from ..permissions import Permissions
 
 guilds = quart.Blueprint('guilds-v3', __name__)
 
@@ -40,20 +41,20 @@ async def create_guild():
             'official': False,
             'owner': owner['id'],
             'emojis': [],
-            'roles': [
-                {
-                    'id': 0,
-                    'name': 'everyone',
-                    'position': 0,
-                    'color': '#000000',
-                    'permissions': [
-                        'VIEW_CHANNELS',
-                        'READ_MESSAGES',
-                        'SEND_MESSAGES',
-                        'CREATE_INVITES',
-                    ],
-                }
-            ],
+            'roles': [],
+            'default_permission': (
+                1 >> 0 
+                | 1 >> 7
+                | 1 >> 8 
+                | 1 >> 12 
+                | 1 >> 13 
+                | 1 >> 15
+                | 1 >> 20
+                | 1 >> 21
+                | 1 >> 22
+                | 1 >> 23
+                | 1 >> 24
+            )
         }
     except KeyError:
         return quart.Response(error_bodys['invalid_data'], 400)
@@ -98,7 +99,7 @@ async def create_guild():
         'mute': False,
         'owner': True,
         'guild_id': id,
-        'roles': [0],
+        'roles': [],
     }
     await members.insert_one(first_joined)
     await guilds_db.insert_one(req)
@@ -127,9 +128,15 @@ async def edit_guild(guild_id: int):
 
     allow = False
 
-    for perm in member['roles'][0]['permissions']:
-        if perm == 'MANAGE_GUILD':
-            allow = True
+    if member['roles'] == []:
+        p = guild['default_permission']
+    else:
+        p = member['roles'][0]['permissions']
+
+    v = Permissions(p)
+
+    if v.manage_guild == True:
+        allow = True
 
     # incorrect permissions
     if allow == False:
@@ -278,7 +285,6 @@ async def join_guild(invite_str):
 
 @guilds.get('/<int:guild_id>/preview')
 async def get_guild_preview(guild_id):
-
     guild = await guilds_db.find_one({'id': guild_id})
 
     if guild == None:
@@ -308,13 +314,19 @@ async def create_invite(guild_id):
     if c == None:
         return quart.Response(error_bodys['not_in_guild'], 403)
 
-    top_role = await guilds_db.find_one(c['roles'][0])
+    guild = await guilds_db.find_one({'id': guild_id})
 
     allow = False
 
-    for perm in top_role['permissions']:
-        if perm == 'CREATE_INVITES':
-            allow = True
+    if c['roles'] == []:
+        v = guild['default_permission']
+    else:
+        v = c['roles'][0]
+
+    p = Permissions(v)
+
+    if p.create_invites is True:
+        allow = True
 
     if allow == False:
         return quart.Response(error_bodys['no_auth'], 401)
