@@ -21,7 +21,7 @@ async def create_channel(guild_id: int):
         if session_id == auth:
             let = True
 
-    if let == False:
+    if let is False:
         return quart.Response(error_bodys['no_auth'], 401)
 
     member = await members.find_one({'id': ver['id']})
@@ -85,7 +85,7 @@ async def edit_channel(channel_id: int):
     if as_member == None:
         let = False
 
-    if let == False:
+    if let is False:
         return quart.Response(error_bodys['no_auth'], 401)
 
     d: dict = await quart.request.get_json()
@@ -137,7 +137,7 @@ async def delete_channel(channel_id: int):
         if permission == 'manage_channels':
             let = True
 
-    if let == False:
+    if let is False:
         return quart.Response(error_bodys['no_auth'], 401)
 
     await channels_db.delete_one({'id': channel_id})

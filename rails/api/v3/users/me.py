@@ -51,7 +51,6 @@ async def create_user():
             'avatar_url': None,
             'banner_url': None,
             'flags': 1 >> 2,
-            'verified': False,
             'email': get_hash_for(d.pop('email')),
             'password': get_hash_for(d.pop('password')),
             'system': False,
@@ -65,7 +64,6 @@ async def create_user():
     else:
         r = quart.Response(json.dumps(given), status=201)
         await user_settings.insert_one({'id': _id, 'accept_friend_requests': True})
-        # email.send(f'Welcome to hatsu! Your verification code is: {email_code}')
         await users.insert_one(given)
         return r
 
@@ -93,7 +91,7 @@ async def edit_user():
         if session_id == quart.request.headers.get('Authorization'):
             allow = True
 
-    if allow == False:
+    if allow is False:
         return quart.Response(error_bodys['no_auth'], status=401)
 
     d: dict = await quart.request.get_json()

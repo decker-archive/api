@@ -37,7 +37,7 @@ async def add_friend(user_id: int):
 
     settings = await user_settings.find_one({'id': to['id']})
 
-    if settings['accept_friend_requests'] == False:
+    if settings['accept_friend_requests'] is False:
         return Response(error_bodys['no_perms'], 403)
 
     await friends.insert_one({'id': user['id'], 'other': user_id, 'request': True})

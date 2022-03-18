@@ -24,11 +24,6 @@ _guilds: motor.AgnosticDatabase = client.get_database(
 _dms: motor.AgnosticDatabase = client.get_database(
     'direct_messages', read_preference=pymongo.ReadPreference.SECONDARY
 )
-_events: motor.AgnosticDatabase = client.get_database('events')
-
-_messages: motor.AgnosticDatabase = client.get_database('messages')
-
-_members: motor.AgnosticDatabase = client.get_database('members')
 
 # users, core
 users: motor.AgnosticCollection = _users.get_collection(
@@ -36,12 +31,13 @@ users: motor.AgnosticCollection = _users.get_collection(
 )
 
 # guilds
-members: motor.AgnosticCollection = _guilds.get_collection(
-    'members', read_preference=pymongo.ReadPreference.SECONDARY
-)
 channels: motor.AgnosticCollection = _guilds.get_collection(
     'channels', read_preference=pymongo.ReadPreference.SECONDARY
 )
+
+messages: motor.AgnosticCollection = _guilds.get_collection('messages')
+
+members: motor.AgnosticCollection = _guilds.get_collection('members')
 
 # dms
 normal_dm: motor.AgnosticCollection = _dms.get_collection(
@@ -53,9 +49,6 @@ group_dm: motor.AgnosticCollection = _dms.get_collection(
 
 guilds: motor.AgnosticCollection = _guilds.get_collection('core')
 
-# core events
-events: motor.AgnosticCollection = _events.get_collection('core')
-
 guild_invites: motor.AgnosticCollection = _guilds.get_collection('invites')
 
 user_interface: motor.AgnosticCollection = _users.get_collection('ui')
@@ -66,8 +59,40 @@ user_settings: motor.AgnosticCollection = _users.get_collection('settings')
 
 friends: motor.AgnosticCollection = _users.get_collection('friends')
 
-async def _create_channel(id: str):
-    await _messages.create_collection(id)
+async def _init_indexes():
+    # guild-specific
 
-async def _create_members(guild_id: str):
-    await _members.create_collection(guild_id)
+    messages.create_index('id', unique=True)
+    messages.create_index('content')
+    messages.create_index('created_at')
+
+    members.create_index('id', unique=True)
+    members.create_index('joined_at')
+    members.create_index('owner')
+    members.create_index('roles')
+
+    guild_invites.create_index('guild_id')
+
+    guilds.create_index('id', unique=True)
+    guilds.create_index('name')
+    guilds.create_index('created_at')
+    guilds.create_index('owner')
+
+    # users
+
+    users.create_index('id', unique=True)
+    users.create_index('username')
+    users.create_index('separator')
+
+    friends.create_index('id')
+    friends.create_index('other')
+
+    user_settings.create_index('id', unique=True)
+
+    # direct messages
+
+    normal_dm.create_index('id', unique=True)
+    normal_dm.create_index('users')
+
+    group_dm.create_index('id', unique=True)
+    group_dm.create_index('users')

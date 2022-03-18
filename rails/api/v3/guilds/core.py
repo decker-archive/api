@@ -11,13 +11,6 @@ from ..permissions import Permissions
 
 guilds = quart.Blueprint('guilds-v3', __name__)
 
-"""
-    mem = await check_if_in_guild(d)
-
-    if mem == None:
-        return quart.Response(error_bodys['not_in_guild'], 403)
-"""
-
 
 @guilds.post('')
 async def create_guild():
@@ -141,7 +134,7 @@ async def edit_guild(guild_id: int):
         allow = True
 
     # incorrect permissions
-    if allow == False:
+    if allow is False:
         return quart.Response(error_bodys['no_perms'], 403)
 
     json: dict = await quart.request.get_json()
@@ -330,7 +323,7 @@ async def create_invite(guild_id):
     if p.create_invites is True:
         allow = True
 
-    if allow == False:
+    if allow is False:
         return quart.Response(error_bodys['no_auth'], 401)
 
     code = await invite_code()

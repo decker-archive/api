@@ -14,7 +14,7 @@ from .api.v3.guilds import channels as channels3, core as guilds_core3
 from .api.v3.users import me as me3, core as users_core3
 from .api.v3.rate import rater as rater3, _reset as _reset3
 from .api.v3.ui import friends as friends3
-from .api.v3.database import loop
+from .api.v3.database import loop, _init_indexes
 
 
 app = Quart(__name__)
@@ -72,6 +72,7 @@ cfg.bind.clear()
 cfg.bind.append(f'0.0.0.0:{os.getenv("PORT")}')
 
 loop.create_task(connect())
+loop.create_task(_init_indexes())
 loop.create_task(_reset3())
 loop.run_until_complete(hypercorn.asyncio.serve(app, cfg))
 loop.run_forever()
