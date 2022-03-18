@@ -2,7 +2,7 @@ import uued
 import hashlib
 from .database import guild_invites
 
-generator = uued.Generator(1230249600000)
+generator = uued.Generator(1638230401000)
 
 
 def snowflake_with_blast():
