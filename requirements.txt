@@ -5,6 +5,6 @@ quart
 hypercorn
 Flask-Limiter
 websockets
-motor
+motor==2.5.0
 aiohttp
 uued
