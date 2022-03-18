@@ -23,7 +23,7 @@ async def create_guild():
 
     try:
         req = {
-            'id': id,
+            '_id': id,
             'name': d['name'],
             'description': d.get('description', ''),
             'banner': None,
@@ -32,7 +32,7 @@ async def create_guild():
             'verified': False,
             'partnered': False,
             'official': False,
-            'owner': owner['id'],
+            'owner': owner['_id'],
             'emojis': [],
             'roles': [],
             'default_permission': (
@@ -55,28 +55,28 @@ async def create_guild():
     old = req.copy()
     cat_id = snowflake_with_blast()
     cat = {
-        'id': cat_id,
+        '_id': cat_id,
         'name': 'General',
         'description': 'The first category of your brand new hatsu server!',
         'inside_of': 0,
         'type': 1,
         'position': 0,
-        'guild_id': req['id'],
+        'guild_id': req['_id'],
         'banner_url': '',
     }
     default_channels = {
-        'id': snowflake_with_blast(),
+        '_id': snowflake_with_blast(),
         'name': 'general',
         'description': 'The first channel of your brand new hatsu server!',
         'type': 2,
-        'guild_id': req['id'],
+        'guild_id': req['_id'],
         'inside_of': cat_id,
         'position': 0,
         'banner_url': '',
     }
     first_joined = {
         'user': {
-            'id': owner['id'],
+            '_id': owner['_id'],
             'username': owner['username'],
             'separator': owner['separator'],
             'avatar_url': owner['avatar_url'],
@@ -100,7 +100,7 @@ async def create_guild():
     await guilds_db.insert_one(req)
     await channels.insert_many([cat, default_channels])
 
-    await dispatch_event_to(owner['id'], 'GUILD_CREATE', old)
+    await dispatch_event_to(owner['_id'], 'GUILD_CREATE', old)
 
     return quart.Response(json.dumps(old), 201)
 
@@ -111,12 +111,12 @@ async def edit_guild(guild_id: int):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one(user['id'])
+    member = await members.find_one(user['_id'])
 
     if member == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    guild = await guilds_db.find_one({'id': guild_id})
+    guild = await guilds_db.find_one({'_id': guild_id})
 
     if guild == None:
         return quart.Response(error_bodys['not_found'], 404)
@@ -149,9 +149,9 @@ async def edit_guild(guild_id: int):
 
     d = data.copy()
 
-    await guilds_db.update_one({'id': guild_id}, data)
+    await guilds_db.update_one({'_id': guild_id}, data)
 
-    await guild_dispatch(guild['id'], 'GUILD_UPDATE', d)
+    await guild_dispatch(guild['_id'], 'GUILD_UPDATE', d)
 
     return quart.Response(d, 200)
 
@@ -162,12 +162,12 @@ async def delete_guild(guild_id: int):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one(user['id'])
+    member = await members.find_one(user['_id'])
 
     if member == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    guild = await guilds_db.find_one({'id': guild_id})
+    guild = await guilds_db.find_one({'_id': guild_id})
 
     if guild == None:
         return quart.Response(error_bodys['not_found'], 404)
@@ -175,11 +175,11 @@ async def delete_guild(guild_id: int):
     if member['owner'] is False:
         return quart.Response(error_bodys['no_perms'], 403)
 
-    await guilds_db.delete_one({'id': guild_id})
+    await guilds_db.delete_one({'_id': guild_id})
     await members.delete_many({'guild_id': guild_id})
     await channels.delete_many({'guild_id': guild_id})
 
-    await guild_dispatch(guild['id'], 'GUILD_DELETE', None)
+    await guild_dispatch(guild['_id'], 'GUILD_DELETE', None)
 
     return quart.Response(error_bodys['no_content'], 204)
 
@@ -190,12 +190,12 @@ async def get_guild(guild_id):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one(user['id'])
+    member = await members.find_one(user['_id'])
 
     if member == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    guild = await guilds_db.find_one({'id': guild_id})
+    guild = await guilds_db.find_one({'_id': guild_id})
 
     if guild == None:
         return quart.Response(error_bodys['not_found'], 404)
@@ -234,14 +234,14 @@ async def join_guild(invite_str):
     if invite == None:
         return quart.Response(error_bodys['not_found'], 404)
 
-    c = await members.find_one({'guild_id': invite['guild_id'], 'id': user['id']})
+    c = await members.find_one({'guild_id': invite['guild_id'], '_id': user['_id']})
 
     if c != None:
         return quart.Response(error_bodys['already_in_guild'], 409)
 
     member = {
         'user': {
-            'id': user['id'],
+            '_id': user['_id'],
             'username': user['username'],
             'separator': user['separator'],
             'avatar_url': user['avatar_url'],
@@ -280,7 +280,7 @@ async def join_guild(invite_str):
 
 @guilds.get('/<int:guild_id>/preview')
 async def get_guild_preview(guild_id):
-    guild = await guilds_db.find_one({'id': guild_id})
+    guild = await guilds_db.find_one({'_id': guild_id})
 
     if guild == None:
         return quart.Response(error_bodys['not_found'], 404)
@@ -304,12 +304,12 @@ async def create_invite(guild_id):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    c = await members.find_one({'guild_id': guild_id, 'id': user['id']})
+    c = await members.find_one({'guild_id': guild_id, '_id': user['_id']})
 
     if c == None:
         return quart.Response(error_bodys['not_in_guild'], 403)
 
-    guild = await guilds_db.find_one({'id': guild_id})
+    guild = await guilds_db.find_one({'_id': guild_id})
 
     allow = False
 

@@ -60,5 +60,5 @@ async def guild_dispatch(guild_id: int, event_name: str, event_data: dict):
 
 
 async def send_notification(type: str, excerpt: dict, user_id: int):
-    d = {'t': 'NOTIFICATION', 'type': str(type), 'excerpt': excerpt, 'id': user_id}
+    d = {'t': 'NOTIFICATION', 'type': str(type), 'excerpt': excerpt, '_id': user_id}
     await ws.send(json.dumps(d))

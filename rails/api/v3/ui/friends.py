@@ -14,7 +14,7 @@ async def get_friends():
     if user == None:
         return Response(error_bodys['no_auth'], 401)
 
-    _r = friends.find({'id': user['id'], 'request': False})
+    _r = friends.find({'_id': user['_id'], 'request': False})
 
     r = []
 
@@ -30,19 +30,19 @@ async def add_friend(user_id: int):
     if user == None:
         return Response(error_bodys['no_auth'], 401)
     
-    to = await users.find_one({'id': user_id})
+    to = await users.find_one({'_id': user_id})
 
     if to == None:
         return Response(error_bodys['not_found'], 404)
 
-    settings = await user_settings.find_one({'id': to['id']})
+    settings = await user_settings.find_one({'_id': to['_id']})
 
     if settings['accept_friend_requests'] is False:
         return Response(error_bodys['no_perms'], 403)
 
-    await friends.insert_one({'id': user['id'], 'other': user_id, 'request': True})
+    await friends.insert_one({'_id': user['_id'], 'other': user_id, 'request': True})
 
-    await send_friend_notification(user['id'], user_id, True)
+    await send_friend_notification(user['_id'], user_id, True)
 
     return Response(error_bodys['no_content'], 204)
 
@@ -53,13 +53,13 @@ async def remove_friend(user_id: int):
     if user == None:
         return Response(error_bodys['no_auth'], 401)
     
-    to = await users.find_one({'id': user_id})
+    to = await users.find_one({'_id': user_id})
 
     if to == None:
         return Response(error_bodys['not_found'], 404)
 
-    await friends.delete_one({'id': user['id'], 'other': user_id})
+    await friends.delete_one({'_id': user['_id'], 'other': user_id})
 
-    await send_friend_notification(user['id'], user_id, False)
+    await send_friend_notification(user['_id'], user_id, False)
 
     return Response(error_bodys['no_content'], 204)

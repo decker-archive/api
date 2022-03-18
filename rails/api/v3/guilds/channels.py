@@ -24,7 +24,7 @@ async def create_channel(guild_id: int):
     if let is False:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one({'id': ver['id']})
+    member = await members.find_one({'_id': ver['_id']})
 
     if member == None:
         return quart.Response(error_bodys['not_in_guild'], 403)
@@ -50,7 +50,7 @@ async def create_channel(guild_id: int):
 
     try:
         data = {
-            'id': snowflake_with_blast(),
+            '_id': snowflake_with_blast(),
             'name': d['name'].lower(),
             'description': d.get('description', ''),
             'guild_id': guild_id,
@@ -78,7 +78,7 @@ async def edit_channel(channel_id: int):
         if session_id == auth:
             let = True
 
-    as_member = await members.find_one({'id': ver['id']})
+    as_member = await members.find_one({'_id': ver['_id']})
 
     if as_member == None:
         let = False
@@ -109,7 +109,7 @@ async def edit_channel(channel_id: int):
     if data == {} or data.get('inside_of') != 0 and data.get('type') == 1:
         return quart.Response(error_bodys['invalid_data'], 400)
 
-    await channels_db.update_one({'id': channel_id}, data)
+    await channels_db.update_one({'_id': channel_id}, data)
 
     return quart.Response(json.dumps({'success': True}))
 
@@ -124,10 +124,10 @@ async def delete_channel(channel_id: int):
         if session_id == auth:
             let = True
 
-    if await members.find_one({'id': ver['id']}) == None:
+    if await members.find_one({'_id': ver['_id']}) == None:
         let = False
 
-    member_obj = await members.find_one({'id': ver['id']})
+    member_obj = await members.find_one({'_id': ver['_id']})
 
     let = False
 
@@ -138,6 +138,6 @@ async def delete_channel(channel_id: int):
     if let is False:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    await channels_db.delete_one({'id': channel_id})
+    await channels_db.delete_one({'_id': channel_id})
 
     return quart.Response(json.dumps({'code': 404}), status=404)

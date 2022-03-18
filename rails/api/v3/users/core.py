@@ -14,14 +14,14 @@ async def get_user(user_id: int):
     if d == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    user = users_db.find_one({'id': user_id})
+    user = users_db.find_one({'_id': user_id})
 
     if user == None:
         return quart.Response(error_bodys['not_found'], 404)
 
     # filter out non-public info, like session_ids
     user_data = {
-        'id': user['id'],
+        '_id': user['_id'],
         'username': user['username'],
         'separator': user['separator'],
         'bio': user['bio'],

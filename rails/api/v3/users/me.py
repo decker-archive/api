@@ -44,7 +44,7 @@ async def create_user():
 
     try:
         given = {
-            'id': _id,
+            '_id': _id,
             'username': d['username'],
             'separator': d['separator'],
             'bio': d.get('bio', ''),
@@ -63,7 +63,7 @@ async def create_user():
         return quart.Response(body=error_bodys['invalid_data'], status=400)
     else:
         r = quart.Response(json.dumps(given), status=201)
-        await user_settings.insert_one({'id': _id, 'accept_friend_requests': True})
+        await user_settings.insert_one({'_id': _id, 'accept_friend_requests': True})
         await users.insert_one(given)
         return r
 
@@ -121,12 +121,12 @@ async def edit_user():
         given['bio'] = d.pop('bio')
     
     if d.get('accept_friend_requests'):
-        await user_settings.update_one({'id': up['id']}, {'accept_friend_requests': bool(d.pop('accept_friend_requests'))})
+        await user_settings.update_one({'_id': up['_id']}, {'accept_friend_requests': bool(d.pop('accept_friend_requests'))})
 
     if given == {}:
         return quart.Response(error_bodys['invalid_data'], 400)
 
-    await users.update_one({'id': up['id']}, given)
+    await users.update_one({'_id': up['_id']}, given)
 
     return quart.Response(json.loads(given), 200)
 
@@ -137,12 +137,12 @@ async def block_user(user_id: int):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
     
-    to = await users.find_one({'id': user_id})
+    to = await users.find_one({'_id': user_id})
 
     if to == None:
         return quart.Response(error_bodys['not_found'], 404)
     
-    await users.update_one({'id': user['id']}, {'blocked_users': [user_id]})
+    await users.update_one({'_id': user['_id']}, {'blocked_users': [user_id]})
 
     return quart.Response(error_bodys['no_content'], 204)
 
@@ -153,12 +153,12 @@ async def unblock_user(user_id: int):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
     
-    to = await users.find_one({'id': user_id})
+    to = await users.find_one({'_id': user_id})
 
     if to == None:
         return quart.Response(error_bodys['not_found'], 404)
     
-    if to['id'] not in user['blocked_users']:
+    if to['_id'] not in user['blocked_users']:
         return quart.Response(error_bodys['no_perms'], 403)
     
     await users
@@ -173,7 +173,7 @@ async def get_me():
         for session_id in find['session_ids']:
             if session_id == quart.request.headers.get('Authorization'):
                 cur = {
-                    'id': find['id'],
+                    '_id': find['_id'],
                     'username': find['username'],
                     'separator': find['separator'],
                     'bio': find['bio'],
