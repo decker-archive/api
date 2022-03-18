@@ -50,9 +50,9 @@ async def create_user():
             'bio': d.get('bio', ''),
             'avatar_url': None,
             'banner_url': None,
-            'flags': ['Early Adopter'],
+            'flags': 1 >> 2,
             'verified': False,
-            'email': d['email'],
+            'email': get_hash_for(d.pop('email')),
             'password': get_hash_for(d.pop('password')),
             'system': False,
             'email_verified': False,
@@ -114,7 +114,7 @@ async def edit_user():
         given['separator'] = d.pop('sparator')
 
     if d.get('email'):
-        given['email'] = d.pop('email')
+        given['email'] = get_hash_for(d.pop('email'))
 
     if d.get('password'):
         given['password'] = get_hash_for(d.pop('password'))
@@ -200,7 +200,7 @@ async def create_session():
 
     u = await users.find_one(
         {
-            'email': login.get('email', ''),
+            'email': get_hash_for(login.get('email', '')),
             'password': get_hash_for(login.get('password', 'nan')),
         }
     )

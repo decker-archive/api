@@ -1,15 +1,15 @@
 # utils for using motor, made to make development easier, and faster.
+import asyncio
 import pymongo
 import motor.core as motor
 import motor.motor_asyncio as motor_
 import dotenv
 import os
-from ..v2 import database
 
 dotenv.load_dotenv()
 
 
-loop = database.loop
+loop = asyncio.new_event_loop()
 client: motor.AgnosticClient = motor_.AsyncIOMotorClient(
     os.getenv('mongo_uri'), io_loop=loop
 )
@@ -26,6 +26,10 @@ _dms: motor.AgnosticDatabase = client.get_database(
 )
 _events: motor.AgnosticDatabase = client.get_database('events')
 
+_messages: motor.AgnosticDatabase = client.get_database('messages')
+
+_members: motor.AgnosticDatabase = client.get_database('members')
+
 # users, core
 users: motor.AgnosticCollection = _users.get_collection(
     'core', read_preference=pymongo.ReadPreference.SECONDARY
@@ -37,9 +41,6 @@ members: motor.AgnosticCollection = _guilds.get_collection(
 )
 channels: motor.AgnosticCollection = _guilds.get_collection(
     'channels', read_preference=pymongo.ReadPreference.SECONDARY
-)
-messages: motor.AgnosticCollection = _guilds.get_collection(
-    'messages', read_preference=pymongo.ReadPreference.SECONDARY
 )
 
 # dms
@@ -64,3 +65,9 @@ user_agent_tracking: motor.AgnosticCollection = _users.get_collection('user-agen
 user_settings: motor.AgnosticCollection = _users.get_collection('settings')
 
 friends: motor.AgnosticCollection = _users.get_collection('friends')
+
+async def _create_channel(id: str):
+    await _messages.create_collection(id)
+
+async def _create_members(guild_id: str):
+    await _members.create_collection(guild_id)

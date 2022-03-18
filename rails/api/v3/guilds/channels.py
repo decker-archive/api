@@ -2,7 +2,7 @@ import quart
 import json
 
 from ..permissions import Permissions
-from ..database import channels as channels_db, users, members, guilds
+from ..database import channels as channels_db, users, members, guilds, _create_channel
 from ..data_bodys import error_bodys
 from ..snowflakes import snowflake_with_blast
 from ...gateway import dispatch_event
@@ -30,7 +30,13 @@ async def create_channel(guild_id: int):
         return quart.Response(error_bodys['not_in_guild'], 403)
 
     if member['roles'] == []:
-        v = guilds.find_one()
+        v = await guilds.find_one(member['guild_id'])
+        p = Permissions(v['default_permissions'])
+    else:
+        p = Permissions(member['roles'][0])
+
+    if p.manage_channels is False:
+        return quart.Response(error_bodys['no_perms'], 403)
 
     d: dict = await quart.request.get_json()
 
@@ -50,6 +56,7 @@ async def create_channel(guild_id: int):
             'guild_id': guild_id,
             'type': d['type'],
             'inside_of': inside_of,
+            'banner_url': str(d.get('banner_url', ''))
         }
     except KeyError:
         return quart.Response(error_bodys['invalid_data'], 400)
@@ -57,6 +64,8 @@ async def create_channel(guild_id: int):
     _d = data.copy()
 
     await channels_db.insert_one(data)
+
+    await _create_channel(_d['id'])
 
     await dispatch_event('channel_create', _d)
 
@@ -81,7 +90,14 @@ async def edit_channel(channel_id: int):
 
     d: dict = await quart.request.get_json()
 
-    if 'MANAGE_CHANNELS' or 'OWNER' not in as_member['permissions']:
+    if as_member['roles'] == []:
+        v = await ...
+    else:
+        v = as_member['roles'][0]
+
+    p = Permissions(v)
+
+    if p.manage_channels is False:
         return quart.Response(error_bodys['no_auth'], 401)
 
     data = {}
@@ -92,7 +108,7 @@ async def edit_channel(channel_id: int):
 
         data[key] = value
 
-    if data == {}:
+    if data == {} or data.get('inside_of') != 0 and data.get('type') == 1:
         return quart.Response(error_bodys['invalid_data'], 400)
 
     await channels_db.update_one({'id': channel_id}, data)

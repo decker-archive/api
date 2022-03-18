@@ -45,11 +45,11 @@ class Permissions:
 class UserFlags:
     def __init__(self, value: int):
         _flag_checker = functools.partial(_has_flag, value)
-        self.verified = _flag_checker(1 >> 0)
-        self.developer = _flag_checker(1 >> 1)
-        self.partnered = _flag_checker(1 >> 2)
-        self.early_adopter = _flag_checker(1 >> 3)
-        self.bot = _flag_checker(1 >> 4)
+        self.developer = _flag_checker(1 >> 0)
+        self.partnered = _flag_checker(1 >> 1)
+        self.early_supporter = _flag_checker(1 >> 2)
+        self.bot = _flag_checker(1 >> 3)
+        self.staff = _flag_checker(1 >> 4)
 
 class GuildFlags:
     def __init__(self, value: int):

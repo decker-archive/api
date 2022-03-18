@@ -14,6 +14,11 @@ error_bodys = {
     'no_content': json.dumps({'message': '204: No Content', 'code': 0,}),
 }
 
-mention = re.compile('<@!*&*[0-9]+>')
+mention = re.compile('<@*&*[0-9]+>')
 emote = re.compile('<:\w+:[0-9]+>')
-channels = re.compile('<#[0-9]+>')
+channel = re.compile('<#[0-9]+>')
+
+def get_regexed_id(reg: str):
+    o = reg[2:]
+
+    return o[:-1]

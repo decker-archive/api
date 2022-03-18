@@ -1,7 +1,7 @@
 import quart
 import json
 
-from datetime import timedelta, datetime, timezone
+from datetime import datetime, timezone
 from ..checks import check_session_
 from ..data_bodys import error_bodys
 from ..database import guilds as guilds_db, channels, members, guild_invites
@@ -69,6 +69,7 @@ async def create_guild():
         'type': 1,
         'position': 0,
         'guild_id': req['id'],
+        'banner_url': '',
     }
     default_channels = {
         'id': snowflake_with_blast(),
@@ -78,6 +79,7 @@ async def create_guild():
         'guild_id': req['id'],
         'inside_of': cat_id,
         'position': 0,
+        'banner_url': '',
     }
     first_joined = {
         'user': {
@@ -135,7 +137,7 @@ async def edit_guild(guild_id: int):
 
     v = Permissions(p)
 
-    if v.manage_guild == True:
+    if v.manage_guild is True:
         allow = True
 
     # incorrect permissions
