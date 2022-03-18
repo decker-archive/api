@@ -2,7 +2,7 @@ import quart
 import json
 
 from ..permissions import Permissions
-from ..database import channels as channels_db, users, members, guilds, _create_channel
+from ..database import channels as channels_db, users, members, guilds
 from ..data_bodys import error_bodys
 from ..snowflakes import snowflake_with_blast
 from ...gateway import dispatch_event
@@ -64,8 +64,6 @@ async def create_channel(guild_id: int):
     _d = data.copy()
 
     await channels_db.insert_one(data)
-
-    await _create_channel(_d['id'])
 
     await dispatch_event('channel_create', _d)
 
