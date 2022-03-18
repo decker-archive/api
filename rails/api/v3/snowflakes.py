@@ -1,15 +1,13 @@
-import datetime
+import uued
 import hashlib
 from .database import guild_invites
-from ..couped.snowflake import snowflake
 
-seq = 0
-instance = 0
+generator = uued.Generator(1230249600000)
 
 
 def snowflake_with_blast():
     """Ensures a Snowflakes safe creation, while being original to it's format"""
-    return str(snowflake())
+    return str(generator.increment())
 
 def hash_from(snowflake: int = None) -> str:
     """Creates a hash from a snowflake"""

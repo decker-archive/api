@@ -1,5 +1,4 @@
 orjson
-snowflake-id
 pymongo[srv]
 python-dotenv
 quart
@@ -8,3 +7,4 @@ Flask-Limiter
 websockets
 motor
 aiohttp
+uued
