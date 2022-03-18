@@ -62,37 +62,28 @@ friends: motor.AgnosticCollection = _users.get_collection('friends')
 async def _init_indexes():
     # guild-specific
 
-    messages.create_index('id', unique=True)
     messages.create_index('content')
     messages.create_index('created_at')
 
-    members.create_index('id', unique=True)
     members.create_index('joined_at')
     members.create_index('owner')
     members.create_index('roles')
 
     guild_invites.create_index('guild_id')
 
-    guilds.create_index('id', unique=True)
     guilds.create_index('name')
     guilds.create_index('created_at')
     guilds.create_index('owner')
 
     # users
 
-    users.create_index('id', unique=True)
     users.create_index('username')
     users.create_index('separator')
 
-    friends.create_index('id')
     friends.create_index('other')
-
-    user_settings.create_index('id', unique=True)
 
     # direct messages
 
-    normal_dm.create_index('id', unique=True)
     normal_dm.create_index('users')
 
-    group_dm.create_index('id', unique=True)
     group_dm.create_index('users')
