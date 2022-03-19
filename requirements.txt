@@ -5,5 +5,5 @@ quart
 hypercorn
 Flask-Limiter
 websockets
-motor==2.5.0
+motor==2.5.1
 ulid-py
