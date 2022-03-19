@@ -274,6 +274,13 @@ async def get_guild_preview(guild_id):
     if guild == None:
         return quart.Response(error_bodys['not_found'], 404)
 
+    cs = []
+
+    async for channel in channels.find({'guild_id': guild_id}):
+        cs.append(channel)
+
+    guild['channels'] = cs
+
     return quart.Response(json.dumps(guild), 200)
 
 
