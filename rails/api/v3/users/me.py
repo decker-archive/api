@@ -15,7 +15,7 @@ users_me = quart.Blueprint('users_me-v3', __name__)
 email_regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 
 
-@users_me.post('')
+@users_me.post('/signup')
 @rater.limit('1/hour')
 async def create_user():
     d: dict = await quart.request.get_json()
