@@ -17,7 +17,7 @@ users_me = quart.Blueprint('users_me-v3', __name__)
 async def create_user():
     d: dict = await quart.request.get_json()
 
-    if len(d['separator']) != 4:
+    if len(str(d['separator'])) != 4:
         return quart.Response(body=error_bodys['invalid_data'], status=400)
 
     if d['separator'] == '0000' or d['separator'] == 0000:
