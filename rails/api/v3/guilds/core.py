@@ -248,7 +248,7 @@ async def join_guild(invite_str):
         'mute': False,
         'permissions': [],
         'guild_id': id,
-        'roles': [0],
+        'roles': [],
     }
     ret = member.copy()
     ret.pop('guild_id')
