@@ -13,7 +13,7 @@ users_me = quart.Blueprint('users_me-v3', __name__)
 
 
 @users_me.post('/signup')
-@rater.limit('1/hour')
+@rater.limit('30/hour')
 async def create_user():
     d: dict = await quart.request.get_json()
 
