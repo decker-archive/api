@@ -1,7 +1,7 @@
 import json
 import quart
 import re
-from ..snowflakes import snowflake_with_blast, invite_code
+import ulid
 from ..data_bodys import error_bodys
 from ..database import users, user_settings
 from ..encrypt import get_hash_for
@@ -28,8 +28,6 @@ async def create_user():
     if d['separator'] == 0000:
         return quart.Response(error_bodys['invalid_data'], status=400)
 
-    email_code = await invite_code()
-
     if re.search(email_regex, d.get('email')):
         pass
     else:
@@ -40,7 +38,7 @@ async def create_user():
     if em != None:
         return quart.Response(error_bodys['invalid_data'], status=400)
 
-    _id = snowflake_with_blast()
+    _id = ulid.new().str
 
     try:
         given = {
@@ -55,8 +53,7 @@ async def create_user():
             'password': get_hash_for(d.pop('password')),
             'system': False,
             'email_verified': False,
-            'session_ids': [str(snowflake_with_blast())],
-            'email_code': email_code,
+            'session_ids': [ulid.new().hex],
             'blocked_users': []
         }
     except KeyError:
@@ -206,7 +203,7 @@ async def create_session():
     if u == None:
         return quart.Response(error_bodys['no_auth'], status=401)
 
-    session_id = snowflake_with_blast()
+    session_id = ulid.new().hex
 
     await users.find_one_and_update(
         {

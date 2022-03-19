@@ -1,28 +1,25 @@
-import uued
+import ulid
 import hashlib
 from .database import guild_invites
 
-generator = uued.Generator(1638230401000)
+Snowflake = str
 
-
-def snowflake_with_blast():
-    """Ensures a Snowflakes safe creation, while being original to it's format"""
-    return str(generator.increment())
-
-def hash_from(snowflake: int = None) -> str:
-    """Creates a hash from a snowflake"""
+def hash_from(snowflake: Snowflake = None) -> str:
     if snowflake:
         return hashlib.sha1(str(snowflake).encode("utf-8")).hexdigest()
     else:
-        return hashlib.sha1(str(snowflake_with_blast()).encode("utf-8")).hexdigest()
+        return hashlib.sha1(str(ulid.new().str)).encode("utf-8").hexdigest()
 
 
-async def invite_code() -> str:
+async def gen_code() -> str:
     import secrets
     import re
 
     raw = secrets.token_urlsafe(10)
     raw = re.sub(r"\/|\+|\-|\_", "", raw)
+
+async def invite_code() -> str:
+    raw = await gen_code()
 
     check = await guild_invites.find_one({'code': raw})
 

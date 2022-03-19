@@ -1,11 +1,12 @@
 import quart
 import json
+import ulid
 
 from datetime import datetime, timezone
 from ..checks import check_session_
 from ..data_bodys import error_bodys
 from ..database import guilds as guilds_db, channels, members, guild_invites
-from ..snowflakes import snowflake_with_blast, invite_code
+from ..snowflakes import invite_code
 from ...gateway import dispatch_event_to, guild_dispatch
 from ..permissions import Permissions
 
@@ -19,7 +20,7 @@ async def create_guild():
         return quart.Response(error_bodys['no_auth'], 401)
 
     d: dict = await quart.request.get_json()
-    id = snowflake_with_blast()
+    id = ulid.new().str
 
     try:
         req = {
@@ -53,7 +54,7 @@ async def create_guild():
         return quart.Response(error_bodys['invalid_data'], 400)
 
     old = req.copy()
-    cat_id = snowflake_with_blast()
+    cat_id = ulid.new().str
     cat = {
         '_id': cat_id,
         'name': 'General',
@@ -65,7 +66,7 @@ async def create_guild():
         'banner_url': '',
     }
     default_channels = {
-        '_id': snowflake_with_blast(),
+        '_id': ulid.new().str,
         'name': 'general',
         'description': 'The first channel of your brand new hatsu server!',
         'type': 2,

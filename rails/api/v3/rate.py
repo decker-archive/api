@@ -1,10 +1,10 @@
 import asyncio
-from typing import Dict
 import flask_limiter
 import quart.flask_patch
+from typing import Dict
+import ulid
 from quart import request, abort
 from dotenv import load_dotenv
-from .snowflakes import snowflake_with_blast
 
 load_dotenv()
 
@@ -19,7 +19,7 @@ def get_key_func():
         if k == compat:
             return v
 
-    id = snowflake_with_blast()
+    id = ulid.new().hex
     keys[compat] = id
     return id
 
@@ -33,5 +33,5 @@ rater = flask_limiter.Limiter(
     headers_enabled=False,
     key_func=get_key_func,
     retry_after='delta-seconds',
-    key_prefix=snowflake_with_blast(),
+    key_prefix=ulid.new().str,
 )

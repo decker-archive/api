@@ -1,10 +1,10 @@
 import quart
 import json
+import ulid
 
 from ..permissions import Permissions
 from ..database import channels as channels_db, users, members, guilds
 from ..data_bodys import error_bodys
-from ..snowflakes import snowflake_with_blast
 from ...gateway import dispatch_event
 
 app = quart.current_app
@@ -50,7 +50,7 @@ async def create_channel(guild_id: int):
 
     try:
         data = {
-            '_id': snowflake_with_blast(),
+            '_id': ulid.new().str,
             'name': d['name'].lower(),
             'description': d.get('description', ''),
             'guild_id': guild_id,

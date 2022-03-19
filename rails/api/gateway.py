@@ -1,5 +1,4 @@
 import json
-import aiohttp
 from websockets import client
 from asyncio import get_running_loop, sleep
 
