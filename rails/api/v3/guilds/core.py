@@ -61,7 +61,7 @@ async def create_guild():
     cat = {
         '_id': cat_id,
         'name': 'General',
-        'description': 'The first category of your brand new hatsu server!',
+        'description': '',
         'inside_of': 0,
         'type': 1,
         'position': 0,
@@ -72,7 +72,7 @@ async def create_guild():
     default_channels = {
         '_id': ulid.new().str,
         'name': 'general',
-        'description': 'The first channel of your brand new hatsu server!',
+        'description': '',
         'type': 2,
         'guild_id': req['_id'],
         'inside_of': cat_id,
