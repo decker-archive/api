@@ -11,9 +11,6 @@ from ..rate import rater
 
 users_me = quart.Blueprint('users_me-v3', __name__)
 
-# regex for emails
-email_regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
-
 
 @users_me.post('/signup')
 @rater.limit('1/hour')
@@ -27,11 +24,6 @@ async def create_user():
         return quart.Response(body=error_bodys['invalid_data'], status=400)
 
     if d['separator'] == '0000':
-        return quart.Response(error_bodys['invalid_data'], status=400)
-
-    if re.search(email_regex, d.get('email')):
-        pass
-    else:
         return quart.Response(error_bodys['invalid_data'], status=400)
     
     em = users.find_one({'email': d.get('email')})
