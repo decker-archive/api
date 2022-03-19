@@ -20,7 +20,7 @@ async def create_user():
     if len(str(d['separator'])) != 4:
         return quart.Response(body=error_bodys['invalid_data'], status=400)
 
-    if d['separator'] == '0000' or d['separator'] == 0000:
+    if str(d['separator']) == '0000':
         return quart.Response(error_bodys['invalid_data'], status=400)
 
     em = users.find_one({'email': d.get('email')})
