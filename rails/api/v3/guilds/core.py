@@ -277,6 +277,7 @@ async def get_guild_preview(guild_id):
     cs = []
 
     async for channel in channels.find({'guild_id': guild_id}):
+        channel.pop('guild_id')
         cs.append(channel)
 
     guild['channels'] = cs
