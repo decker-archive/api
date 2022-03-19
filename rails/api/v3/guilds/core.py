@@ -81,17 +81,7 @@ async def create_guild():
         'bypass': []
     }
     first_joined = {
-        'user': {
-            '_id': owner['_id'],
-            'username': owner['username'],
-            'separator': owner['separator'],
-            'avatar_url': owner['avatar_url'],
-            'banner_url': owner['banner_url'],
-            'flags': owner['flags'],
-            'verified': owner['verified'],
-            'system': owner['system'],
-            'session_ids': owner['session_ids'],
-        },
+        'user': owner,
         'nick': None,
         'avatar_url': None,
         'banner_url': None,
@@ -249,17 +239,7 @@ async def join_guild(invite_str):
         return quart.Response(error_bodys['already_in_guild'], 409)
 
     member = {
-        'user': {
-            '_id': user['_id'],
-            'username': user['username'],
-            'separator': user['separator'],
-            'avatar_url': user['avatar_url'],
-            'banner_url': user['banner_url'],
-            'flags': user['flags'],
-            'verified': user['verified'],
-            'system': user['system'],
-            'session_ids': user['session_ids'],
-        },
+        'user': user,
         'nick': None,
         'avatar_url': None,
         'banner_url': None,
