@@ -13,7 +13,7 @@ from ..permissions import Permissions
 guilds = quart.Blueprint('guilds-v3', __name__)
 
 
-@guilds.post('')
+@guilds.post('/create')
 async def create_guild():
     owner = await check_session_(quart.request.headers.get('Authorization'))
     if owner == None:
