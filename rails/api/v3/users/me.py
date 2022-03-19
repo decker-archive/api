@@ -17,15 +17,12 @@ users_me = quart.Blueprint('users_me-v3', __name__)
 async def create_user():
     d: dict = await quart.request.get_json()
 
-    if not isinstance(d['separator'], str):
-        return quart.Response(error_bodys['invalid_data'], status=400)
-
     if len(d['separator']) != 4:
         return quart.Response(body=error_bodys['invalid_data'], status=400)
 
-    if d['separator'] == '0000':
+    if d['separator'] == '0000' or d['separator'] == 0000:
         return quart.Response(error_bodys['invalid_data'], status=400)
-    
+
     em = users.find_one({'email': d.get('email')})
 
     if em != None:
@@ -37,7 +34,7 @@ async def create_user():
         given = {
             '_id': _id,
             'username': d['username'],
-            'separator': d['separator'],
+            'separator': str(d['separator']),
             'bio': d.get('bio', ''),
             'avatar_url': None,
             'banner_url': None,
