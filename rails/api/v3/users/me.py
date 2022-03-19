@@ -25,7 +25,7 @@ async def create_user():
 
     em = users.find_one({'email': d.get('email')})
 
-    if em != None:
+    if isinstance(em, dict):
         return quart.Response(error_bodys['invalid_data'], status=400)
 
     _id = ulid.new().str
@@ -38,7 +38,7 @@ async def create_user():
             'bio': d.get('bio', ''),
             'avatar_url': None,
             'banner_url': None,
-            'flags': 1 >> 2,
+            'flags': 1 << 2,
             'email': get_hash_for(d.pop('email')),
             'password': get_hash_for(d.pop('password')),
             'system': False,
@@ -49,6 +49,7 @@ async def create_user():
             'created_at': datetime.datetime.now(datetime.timezone.utc).isoformat()
         }
     except KeyError:
+        print('e')
         return quart.Response(body=error_bodys['invalid_data'], status=400)
     else:
         r = quart.Response(json.dumps(given), status=201)

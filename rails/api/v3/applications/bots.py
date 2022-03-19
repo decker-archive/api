@@ -47,7 +47,7 @@ async def create_bot():
             'bio': d.get('bio', ''),
             'avatar_url': None,
             'banner_url': None,
-            'flags': 1 >> 2,
+            'flags': 1 << 2,
             'system': False,
             'email_verified': True,
             'session_ids': [ulid.new().hex],
