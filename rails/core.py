@@ -10,11 +10,12 @@ from quart import Quart, Response
 
 from .api.gateway import connect
 
-from .api.v3.guilds import channels as channels3, core as guilds_core3
+from .api.v3.guilds import channels as channels3, core as guilds_core3, messages as messages3
 from .api.v3.users import me as me3, core as users_core3
 from .api.v3.rate import rater as rater3, _reset as _reset3
 from .api.v3.ui import friends as friends3
 from .api.v3.database import loop, _init_indexes
+from .api.v3.applications import bots as bots3
 
 
 app = Quart(__name__)
@@ -61,7 +62,9 @@ bps = {
     guilds_core3.guilds: '/v3/guilds',
     me3.users_me: '/v3/users/@me',
     users_core3.users: '/v3/users',
-    friends3.ui: '/v3/ui/friends'
+    friends3.ui: '/v3/ui/friends',
+    bots3.bots: '/v3/bots',
+    messages3.msgs: '/v3/channels'
 }
 
 for value, suffix in bps.items():

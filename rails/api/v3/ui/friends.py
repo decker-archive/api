@@ -14,6 +14,9 @@ async def get_friends():
     if user == None:
         return Response(error_bodys['no_auth'], 401)
 
+    if user['bot']:
+        return Response(error_bodys['no_perms'], 403)
+
     _r = friends.find({'_id': user['_id'], 'request': False})
 
     r = []
@@ -23,12 +26,15 @@ async def get_friends():
 
     return Response(json.dumps(r), 200)
 
-@ui.get('/<int:user_id>')
+@ui.get('/<user_id>')
 async def add_friend(user_id: int):
     user = await check_session_(request.headers.get('Authorization'))
 
     if user == None:
         return Response(error_bodys['no_auth'], 401)
+
+    if user['bot']:
+        return Response(error_bodys['no_perms'], 403)
     
     to = await users.find_one({'_id': user_id})
 
@@ -46,12 +52,15 @@ async def add_friend(user_id: int):
 
     return Response(error_bodys['no_content'], 204)
 
-@ui.get('/<int:user_id>')
+@ui.get('/<user_id>')
 async def remove_friend(user_id: int):
     user = await check_session_(request.headers.get('Authorization'))
 
     if user == None:
         return Response(error_bodys['no_auth'], 401)
+    
+    if user['bot']:
+        return Response(error_bodys['no_perms'], 403)
     
     to = await users.find_one({'_id': user_id})
 

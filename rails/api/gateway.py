@@ -10,7 +10,7 @@ async def real_connect():
     global ws
     print(f'Connecting to wss://gateway-prod-1.vincentrps.xyz')
     ws = await client.connect(
-        'wss://gateway-prod-1.vincentrps.xyz',
+        'wss://gateway-prd-1.senpai-is-best.xyz',
         ping_timeout=20,
         close_timeout=10000000
     )

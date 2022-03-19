@@ -48,8 +48,7 @@ class UserFlags:
         self.developer = _flag_checker(1 >> 0)
         self.partnered = _flag_checker(1 >> 1)
         self.early_supporter = _flag_checker(1 >> 2)
-        self.bot = _flag_checker(1 >> 3)
-        self.staff = _flag_checker(1 >> 4)
+        self.staff = _flag_checker(1 >> 3)
 
 class GuildFlags:
     def __init__(self, value: int):

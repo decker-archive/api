@@ -3,7 +3,7 @@ import json
 import ulid
 
 from ..permissions import Permissions
-from ..database import channels as channels_db, users, members, guilds
+from ..database import channels as channels_db, users, members, guilds, _messages
 from ..data_bodys import error_bodys
 from ...gateway import dispatch_event
 
@@ -11,7 +11,7 @@ app = quart.current_app
 channels = quart.Blueprint('channels-v3', __name__)
 
 
-@channels.post('/<int:guild_id>/channels')
+@channels.post('/<guild_id>/channels')
 async def create_channel(guild_id: int):
     auth = quart.request.headers.get('Authorization')
     ver = await users.find_one({'session_ids': [auth]})
@@ -31,9 +31,9 @@ async def create_channel(guild_id: int):
 
     if member['roles'] == []:
         v = await guilds.find_one(member['guild_id'])
-        p = Permissions(v['default_permissions'])
+        p = Permissions(v['default_permission'])
     else:
-        p = Permissions(member['roles'][0])
+        p = Permissions(member['roles'][0]['permissions'])
 
     if p.manage_channels is False:
         return quart.Response(error_bodys['no_perms'], 403)
@@ -56,7 +56,8 @@ async def create_channel(guild_id: int):
             'guild_id': guild_id,
             'type': d['type'],
             'inside_of': inside_of,
-            'banner_url': str(d.get('banner_url', ''))
+            'banner_url': str(d.get('banner_url', '')),
+            'bypass': {}
         }
     except KeyError:
         return quart.Response(error_bodys['invalid_data'], 400)
@@ -68,7 +69,7 @@ async def create_channel(guild_id: int):
     await dispatch_event('channel_create', _d)
 
 
-@channels.get('/channels/<int:channel_id>')
+@channels.get('/channels/<channel_id>')
 async def edit_channel(channel_id: int):
     auth = quart.request.headers.get('Authorization')
     ver = await users.find_one({'session_ids': [auth]})
@@ -79,9 +80,15 @@ async def edit_channel(channel_id: int):
             let = True
 
     as_member = await members.find_one({'_id': ver['_id']})
+    channel = channels_db.find_one({'_id': channel_id})
 
     if as_member == None:
         let = False
+
+    guild = guilds.find_one({'_id': as_member['guild_id']})
+
+    if channel == None:
+        return quart.Response(error_bodys['no_perms'], 403)
 
     if let is False:
         return quart.Response(error_bodys['no_auth'], 401)
@@ -89,20 +96,37 @@ async def edit_channel(channel_id: int):
     d: dict = await quart.request.get_json()
 
     if as_member['roles'] == []:
-        v = await ...
+        v = await guild
     else:
-        v = as_member['roles'][0]
+        v = as_member['roles'][0]['permissions']
 
     p = Permissions(v)
 
-    if p.manage_channels is False:
+    good = False
+
+    if p.manage_channels:
+        good = True
+
+    for b in channel['bypass']:
+        if b['id'] == as_member['user']['id']:
+            v = Permissions(b['value'])
+            if v.manage_channels:
+                good = True
+            else:
+                good = False
+    
+    if good == False:
         return quart.Response(error_bodys['no_auth'], 401)
 
     data = {}
 
     for key, value in d.items():
-        if key not in ('name', 'inside_of', 'type'):
+        if key not in ('name', 'inside_of', 'type', 'bypass'):
             return quart.Response(error_bodys['invalid_data'], 400)
+
+        if key == 'bypass':
+            if not isinstance(value, dict):
+                return quart.Response(error_bodys['invalid_data'], 400)
 
         data[key] = value
 
@@ -111,10 +135,10 @@ async def edit_channel(channel_id: int):
 
     await channels_db.update_one({'_id': channel_id}, data)
 
-    return quart.Response(json.dumps({'success': True}))
+    return quart.Response(json.dumps(data))
 
 
-@channels.delete('/channels/<int:channel_id>')
+@channels.delete('/channels/<channel_id>')
 async def delete_channel(channel_id: int):
     auth = quart.request.headers.get('Authorization')
     ver = await users.find_one({'session_ids': [auth]})
@@ -124,10 +148,15 @@ async def delete_channel(channel_id: int):
         if session_id == auth:
             let = True
 
-    if await members.find_one({'_id': ver['_id']}) == None:
+    channel = await channels_db.find_one({'_id': channel_id})
+
+    if channel == None:
+        return quart.Response(error_bodys['not_found'], 404)
+
+    if await members.find_one({'_id': ver['_id'], 'guild_id': channel['guild_id']}) == None:
         let = False
 
-    member_obj = await members.find_one({'_id': ver['_id']})
+    member_obj = await members.find_one({'_id': ver['_id'], 'guild_id': channel['guild_id']})
 
     let = False
 
@@ -139,5 +168,6 @@ async def delete_channel(channel_id: int):
         return quart.Response(error_bodys['no_auth'], 401)
 
     await channels_db.delete_one({'_id': channel_id})
+    await _messages.drop_collection(channel_id)
 
     return quart.Response(json.dumps({'code': 404}), status=404)

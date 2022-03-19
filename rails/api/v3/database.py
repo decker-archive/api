@@ -25,6 +25,10 @@ _dms: motor.AgnosticDatabase = client.get_database(
     'direct_messages', read_preference=pymongo.ReadPreference.SECONDARY
 )
 
+_messages: motor.AgnosticDatabase = client.get_database(
+    'messages', read_preference=pymongo.ReadPreference.PRIMARY
+)
+
 # users, core
 users: motor.AgnosticCollection = _users.get_collection(
     'core', read_preference=pymongo.ReadPreference.SECONDARY
@@ -34,8 +38,6 @@ users: motor.AgnosticCollection = _users.get_collection(
 channels: motor.AgnosticCollection = _guilds.get_collection(
     'channels', read_preference=pymongo.ReadPreference.SECONDARY
 )
-
-messages: motor.AgnosticCollection = _guilds.get_collection('messages')
 
 members: motor.AgnosticCollection = _guilds.get_collection('members')
 
@@ -59,31 +61,51 @@ user_settings: motor.AgnosticCollection = _users.get_collection('settings')
 
 friends: motor.AgnosticCollection = _users.get_collection('friends')
 
+async def send_message(channel_id: str, data: dict):
+    col: motor.AgnosticCollection = _messages.get_collection(channel_id)
+    await col.create_index('content')
+    await col.create_index('created_at')
+    await col.create_index('channel_id')
+
+    data['channel_id'] = channel_id
+
+    await col.insert_one(data)
+
+async def get_message(channel_id: str, message_id: str):
+    c: motor.AgnosticCursor = await channels.find({'_id': channel_id})
+
+    cc = await c.to_list(1)
+
+    if cc == []:
+        return None
+
+    col: motor.AgnosticCollection = _messages.get_collection(channel_id)
+    
+    return await col.find_one({'channel_id': channel_id, '_id': message_id})
+
 async def _init_indexes():
     # guild-specific
 
-    messages.create_index('content')
-    messages.create_index('created_at')
+    await members.create_index('joined_at')
+    await members.create_index('owner')
+    await members.create_index('roles')
 
-    members.create_index('joined_at')
-    members.create_index('owner')
-    members.create_index('roles')
+    await guild_invites.create_index('guild_id')
+    await guild_invites.create_index('code')
 
-    guild_invites.create_index('guild_id')
-
-    guilds.create_index('name')
-    guilds.create_index('created_at')
-    guilds.create_index('owner')
+    await guilds.create_index('name')
+    await guilds.create_index('created_at')
+    await guilds.create_index('owner')
 
     # users
 
-    users.create_index('username')
-    users.create_index('separator')
+    await users.create_index('username')
+    await users.create_index('separator')
 
-    friends.create_index('other')
+    await friends.create_index('other')
 
     # direct messages
 
-    normal_dm.create_index('users')
+    await normal_dm.create_index('users')
 
-    group_dm.create_index('users')
+    await group_dm.create_index('users')

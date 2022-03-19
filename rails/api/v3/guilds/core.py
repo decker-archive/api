@@ -19,6 +19,9 @@ async def create_guild():
     if owner == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
+    if owner['bot']:
+        return quart.Response(error_bodys['no_perms'], 403)
+
     d: dict = await quart.request.get_json()
     id = ulid.new().str
 
@@ -64,6 +67,7 @@ async def create_guild():
         'position': 0,
         'guild_id': req['_id'],
         'banner_url': '',
+        'bypass': []
     }
     default_channels = {
         '_id': ulid.new().str,
@@ -74,6 +78,7 @@ async def create_guild():
         'inside_of': cat_id,
         'position': 0,
         'banner_url': '',
+        'bypass': []
     }
     first_joined = {
         'user': {
@@ -106,7 +111,7 @@ async def create_guild():
     return quart.Response(json.dumps(old), 201)
 
 
-@guilds.patch('/<int:guild_id>')
+@guilds.patch('/<guild_id>')
 async def edit_guild(guild_id: int):
     user = await check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -131,7 +136,7 @@ async def edit_guild(guild_id: int):
 
     v = Permissions(p)
 
-    if v.manage_guild is True:
+    if v.manage_guild is True or member['owner'] is True:
         allow = True
 
     # incorrect permissions
@@ -157,7 +162,7 @@ async def edit_guild(guild_id: int):
     return quart.Response(d, 200)
 
 
-@guilds.delete('/<int:guild_id>')
+@guilds.delete('/<guild_id>')
 async def delete_guild(guild_id: int):
     user = await check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -185,7 +190,7 @@ async def delete_guild(guild_id: int):
     return quart.Response(error_bodys['no_content'], 204)
 
 
-@guilds.get('/<int:guild_id>')
+@guilds.get('/<guild_id>')
 async def get_guild(guild_id):
     user = await check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -204,7 +209,7 @@ async def get_guild(guild_id):
     return quart.Response(json.dumps(guild), 200)
 
 
-@guilds.get('/<int:guild_id>/members')
+@guilds.get('/<guild_id>/members')
 async def get_guild_members(guild_id):
     user = await check_session_(quart.request.headers.get('Authorization'))
     if user == None:
@@ -222,13 +227,16 @@ async def get_guild_members(guild_id):
     return quart.Response(json.dumps(ret), 200)
 
 
-@guilds.post('/invites/<int:invite_str>')
+@guilds.post('/invites/<invite_str>')
 async def join_guild(invite_str):
 
     user = await check_session_(quart.request.headers.get('Authorization'))
 
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
+
+    if user['bot']:
+        return quart.Response(error_bodys['no_perms'], 403)
 
     invite = await guild_invites.find_one({'code': invite_str})
 
@@ -279,7 +287,7 @@ async def join_guild(invite_str):
     return quart.Response(json.dumps(ret), 200)
 
 
-@guilds.get('/<int:guild_id>/preview')
+@guilds.get('/<guild_id>/preview')
 async def get_guild_preview(guild_id):
     guild = await guilds_db.find_one({'_id': guild_id})
 
@@ -298,7 +306,7 @@ async def get_guild_preview(guild_id):
     return quart.Response(json.dumps(ret), 200)
 
 
-@guilds.post('/<int:guild_id>/invites')
+@guilds.post('/<guild_id>/invites')
 async def create_invite(guild_id):
     user = await check_session_(quart.request.headers.get('Authorization'))
 
@@ -317,7 +325,7 @@ async def create_invite(guild_id):
     if c['roles'] == []:
         v = guild['default_permission']
     else:
-        v = c['roles'][0]
+        v = c['roles'][0]['permissions']
 
     p = Permissions(v)
 

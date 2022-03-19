@@ -7,7 +7,7 @@ from ..checks import check_session_
 users = quart.Blueprint('users-v3', __name__)
 
 
-@users.get('/<int:user_id>')
+@users.get('/<user_id>')
 async def get_user(user_id: int):
     d = await check_session_(quart.request.headers.get('Authorization'))
 
@@ -30,6 +30,8 @@ async def get_user(user_id: int):
         'flags': user['flags'],
         'verified': user['verified'],
         'system': user['system'],
+        'created_at': user['created_at'],
+        'bot': user['bot']
     }
 
     return quart.Response(json.dumps(user_data), 200)
