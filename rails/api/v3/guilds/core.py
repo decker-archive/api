@@ -294,16 +294,7 @@ async def get_guild_preview(guild_id):
     if guild == None:
         return quart.Response(error_bodys['not_found'], 404)
 
-    ret = {
-        'name': guild['name'],
-        'description': guild['description'],
-        'invite_banner': guild['invite_banner'],
-        'partnered': guild['partnered'],
-        'official': guild['official'],
-        'emojis': guild['emojis'],
-    }
-
-    return quart.Response(json.dumps(ret), 200)
+    return quart.Response(json.dumps(guild), 200)
 
 
 @guilds.post('/<guild_id>/invites')
