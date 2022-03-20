@@ -1,6 +1,7 @@
 import asyncio
 import flask_limiter
 import quart.flask_patch
+import ulid
 from typing import Dict
 from quart import request, abort
 from dotenv import load_dotenv
@@ -14,12 +15,12 @@ def get_key_func():
     try:
         compat = request.method + ':' + request.endpoint + ':' + request.remote_addr
     except:
-        return gen_code()
+        abort(404)
     for k, v in keys.items():
         if k == compat:
             return v
 
-    id = gen_code()
+    id = ulid.new().hex
     keys[compat] = id
     return id
 
@@ -33,5 +34,5 @@ rater = flask_limiter.Limiter(
     headers_enabled=False,
     key_func=get_key_func,
     retry_after='delta-seconds',
-    key_prefix=gen_code(),
+    key_prefix=ulid.new().hex,
 )
