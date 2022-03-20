@@ -1,12 +1,11 @@
 import quart
 import json
-import ulid
 
 from datetime import datetime, timezone
 from ..checks import check_session_
 from ..data_bodys import error_bodys
 from ..database import guilds as guilds_db, channels, members, guild_invites
-from ..snowflakes import invite_code
+from ..snowflakes import invite_code, snowflake
 from ...gateway import dispatch_event_to, guild_dispatch
 from ..permissions import Permissions
 
@@ -23,7 +22,7 @@ async def create_guild():
         return quart.Response(error_bodys['no_perms'], 403)
 
     d: dict = await quart.request.get_json()
-    id = ulid.new().str
+    id = snowflake()
 
     try:
         req = {
@@ -57,7 +56,7 @@ async def create_guild():
         return quart.Response(error_bodys['invalid_data'], 400)
 
     old = req.copy()
-    cat_id = ulid.new().str
+    cat_id = snowflake()
     cat = {
         '_id': cat_id,
         'name': 'General',
@@ -70,7 +69,7 @@ async def create_guild():
         'bypass': []
     }
     default_channels = {
-        '_id': ulid.new().str,
+        '_id': snowflake(),
         'name': 'general',
         'description': '',
         'type': 2,
@@ -82,6 +81,7 @@ async def create_guild():
         'pinned_messages': []
     }
     first_joined = {
+        '_id': owner['_id'],
         'user': owner,
         'nick': None,
         'avatar_url': None,
@@ -240,6 +240,7 @@ async def join_guild(invite_str):
         return quart.Response(error_bodys['already_in_guild'], 409)
 
     member = {
+        '_id': user['_id'],
         'user': user,
         'nick': None,
         'avatar_url': None,

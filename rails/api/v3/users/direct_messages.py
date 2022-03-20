@@ -1,4 +1,3 @@
-import ulid
 from quart import request, Response, Blueprint
 from ..database import normal_dm, group_dm, friends
 

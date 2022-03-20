@@ -1,10 +1,11 @@
-import ulid
 import quart
 import json
 import datetime
 from quart import Blueprint, request
 from ..data_bodys import error_bodys
 from ..database import users, user_settings
+from ..snowflakes import hash_from, snowflake
+from ..encrypt import get_hash_for
 
 bots = Blueprint('bots-v3', __name__)
 
@@ -37,7 +38,7 @@ async def create_bot():
     if em != None:
         return quart.Response(error_bodys['invalid_data'], status=400)
 
-    _id = ulid.new().str
+    _id = snowflake()
 
     try:
         given = {
@@ -50,7 +51,7 @@ async def create_bot():
             'flags': 1 << 2,
             'system': False,
             'email_verified': True,
-            'session_ids': [ulid.new().hex],
+            'session_ids': [get_hash_for(hash_from())],
             'blocked_users': [],
             'bot': True,
             'created_at': datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -75,4 +76,4 @@ async def delete_bot():
     if not user['bot']:
         return quart.Response(error_bodys['no_perms'], 403)
 
-    await users.delete_one({'_id': user['id']})
+    await users.delete_one({'_id': user['_id']})
