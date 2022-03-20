@@ -13,9 +13,9 @@ def snowflake():
 
 def hash_from(snowflake_: Snowflake = None) -> str:
     if snowflake_:
-        return hashlib.sha1(str(snowflake_).encode("utf-8")).hexdigest()
+        return hashlib.sha384(str(snowflake_).encode("utf-8")).hexdigest()
     else:
-        return hashlib.sha1(snowflake()).encode("utf-8").hexdigest()
+        return hashlib.sha384(snowflake().encode("utf-8")).hexdigest()
 
 
 def gen_code() -> str:
