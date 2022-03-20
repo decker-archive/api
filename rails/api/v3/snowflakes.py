@@ -6,7 +6,7 @@ from .database import guild_invites
 
 dotenv.load_dotenv()
 Snowflake = str
-generator = _snowflake.Generator(1371270861000, int(os.getenv('process_id', 0)), int(os.getenv('worker_id', 0)))
+generator = _snowflake.Generator(1498192579000, int(os.getenv('process_id', 0)), int(os.getenv('worker_id', 0)))
 
 def snowflake():
     return str(generator.generate())
