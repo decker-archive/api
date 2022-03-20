@@ -2,7 +2,7 @@ import json
 import ulid
 import datetime
 from quart import Blueprint, Response, request
-from ..database import channels, users, send_message, get_message, members
+from ..database import channels, users, send_message, get_message as find_message, members, guilds, delete_message
 from ..data_bodys import error_bodys as err
 from ..permissions import Permissions
 from ..data_bodys import mention, get_regexed_id
@@ -73,7 +73,7 @@ def _verify_embed(d: dict):
 
     return ret
 
-@msgs.post('/<channel_id>/messages')
+@msgs.post('/<channel_id>/messages/create')
 async def create_message(channel_id):
     auth = request.headers.get('Authorization', '')
     user = await users.find_one({'session_ids': [auth]})
@@ -86,7 +86,7 @@ async def create_message(channel_id):
     if channel == None:
         return Response(err['not_found'], 404)
 
-    member = members.find_one({'_id': user['id'], 'guild_id': channel['guild_id']})
+    member = members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
 
     if member == None:
         return Response(err['not_found'], 404)
@@ -151,7 +151,7 @@ async def create_message(channel_id):
 
     await send_message(channel_id=channel_id, data=data)
 
-    await guild_dispatch(guild['id'], 'MESSAGE_CREATE', data)
+    await guild_dispatch(guild['_id'], 'MESSAGE_CREATE', data)
 
     mentions = mention.findall(data['content'])
 
@@ -183,7 +183,7 @@ async def get_message(channel_id, message_id):
     if channel == None:
         return Response(err['not_found'], 404)
 
-    member = members.find_one({'_id': user['id'], 'guild_id': channel['guild_id']})
+    member = members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
 
     if member == None:
         return Response(err['not_found'], 404)
@@ -203,7 +203,7 @@ async def get_message(channel_id, message_id):
         gtg = True
 
     for b in channel['bypass']:
-        if user['id'] == b['id']:
+        if user['_id'] == b['_id']:
             v = Permissions(b['value'])
             if v.read_message_history:
                 gtg = True
@@ -213,9 +213,57 @@ async def get_message(channel_id, message_id):
     if gtg is False:
         return Response(err['no_perms'], 403)
 
-    ms = await get_message(channel_id, message_id)
+    ms = await find_message(channel_id, message_id)
 
     if ms == None:
         return Response(err['not_found'], 404)
 
     return Response(json.dumps(ms), 200)
+
+
+@msgs.delete('/<channel_id>/messages/<message_id>')
+async def delete_message(channel_id, message_id):
+    auth = request.headers.get('Authorization', '')
+    user = await users.find_one({'session_ids': [auth]})
+
+    if user == None:
+        return Response(err['no_auth'], 401)
+
+    channel = channels.find_one({'_id': channel_id})
+
+    if channel == None:
+        return Response(err['not_found'], 404)
+
+    member = await members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
+
+    if member == None:
+        return Response(err['no_perms'], 403)
+
+    message = await find_message(channel['id'], message_id)
+
+    if message == None:
+        return Response(err['not_found'], 404)
+
+    if member['roles'] == []:
+        guild = await guilds.find_one({'_id': channel['guild_id']})
+        v = guild['default_permission']
+    else:
+        v = member['roles'][0]['permissions']
+
+    p = Permissions(v)
+    bypassed = False
+
+    for bypass in channel['bypass']:
+        if user['_id'] == bypass['_id']:
+            _p = Permissions(bypass['value'])
+            if _p.manage_messages:
+                bypassed = True
+
+    if not p.manage_messages and not bypassed:
+        return Response(err['no_perms'], 403)
+
+    # TODO: Audit Log?
+    await delete_message(channel['id'], message['id'])
+    await guild_dispatch(channel['guild_id'], 'MESSAGE_DELETE', message)
+
+    return Response(json.dumps(message))

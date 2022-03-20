@@ -62,3 +62,17 @@ async def create_bot():
         await user_settings.insert_one({'_id': _id, 'accept_friend_requests': False})
         await users.insert_one(given)
         return r
+
+@bots.delete('/<bot_id>')
+async def delete_bot():
+    auth = request.headers.get('Authorization', '')
+
+    user = users.find_one({'session_ids': [auth]}) 
+
+    if user == None:
+        return quart.Response(error_bodys['no_auth'], 401)
+
+    if not user['bot']:
+        return quart.Response(error_bodys['no_perms'], 403)
+
+    await users.delete_one({'_id': user['id']})

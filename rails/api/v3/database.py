@@ -83,6 +83,16 @@ async def get_message(channel_id: str, message_id: str):
     
     return await col.find_one({'channel_id': channel_id, '_id': message_id})
 
+async def edit_message(channel_id: str, message_id: str, data: dict):
+    col: motor.AgnosticCollection = _messages.get_collection(channel_id)
+
+    await col.update_one({'_id': message_id}, data)
+
+async def delete_message(channel_id: str, message_id: str):
+    col: motor.AgnosticCollection = _messages.get_collection(channel_id)
+
+    await col.delete_one({'_id': message_id})
+
 async def _init_indexes():
     # guild-specific
 

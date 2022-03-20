@@ -78,7 +78,8 @@ async def create_guild():
         'inside_of': cat_id,
         'position': 0,
         'banner_url': '',
-        'bypass': []
+        'bypass': [],
+        'pinned_messages': []
     }
     first_joined = {
         'user': owner,

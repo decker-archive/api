@@ -57,7 +57,8 @@ async def create_channel(guild_id: int):
             'type': d['type'],
             'inside_of': inside_of,
             'banner_url': str(d.get('banner_url', '')),
-            'bypass': []
+            'bypass': [],
+            'pinned_messages': []
         }
     except KeyError:
         return quart.Response(error_bodys['invalid_data'], 400)
@@ -108,7 +109,7 @@ async def edit_channel(channel_id: int):
         good = True
 
     for b in channel['bypass']:
-        if b['id'] == as_member['user']['id']:
+        if b['_id'] == as_member['user']['_id']:
             v = Permissions(b['value'])
             if v.manage_channels:
                 good = True
