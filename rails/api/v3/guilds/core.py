@@ -1,12 +1,11 @@
 import quart
 import json
-import ulid
 
 from datetime import datetime, timezone
 from ..checks import check_session_
 from ..data_bodys import error_bodys
 from ..database import guilds as guilds_db, channels, members, guild_invites
-from ..snowflakes import invite_code
+from ..snowflakes import invite_code, snowflake
 from ...gateway import dispatch_event_to, guild_dispatch
 from ..permissions import Permissions
 
@@ -23,7 +22,7 @@ async def create_guild():
         return quart.Response(error_bodys['no_perms'], 403)
 
     d: dict = await quart.request.get_json()
-    id = ulid.new().str
+    id = snowflake()
 
     try:
         req = {
@@ -57,7 +56,7 @@ async def create_guild():
         return quart.Response(error_bodys['invalid_data'], 400)
 
     old = req.copy()
-    cat_id = ulid.new().str
+    cat_id = snowflake()
     cat = {
         '_id': cat_id,
         'name': 'General',
@@ -70,7 +69,7 @@ async def create_guild():
         'bypass': []
     }
     default_channels = {
-        '_id': ulid.new().str,
+        '_id': snowflake(),
         'name': 'general',
         'description': '',
         'type': 2,
@@ -82,6 +81,7 @@ async def create_guild():
         'pinned_messages': []
     }
     first_joined = {
+        'id': owner['_id'],
         'user': owner,
         'nick': None,
         'avatar_url': None,
@@ -108,7 +108,7 @@ async def edit_guild(guild_id: int):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one(user['_id'])
+    member = await members.find_one(user['id'])
 
     if member == None:
         return quart.Response(error_bodys['no_auth'], 401)
@@ -159,7 +159,7 @@ async def delete_guild(guild_id: int):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one(user['_id'])
+    member = await members.find_one(user['id'])
 
     if member == None:
         return quart.Response(error_bodys['no_auth'], 401)
@@ -187,7 +187,7 @@ async def get_guild(guild_id):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one(user['_id'])
+    member = await members.find_one(user['id'])
 
     if member == None:
         return quart.Response(error_bodys['no_auth'], 401)
@@ -234,12 +234,13 @@ async def join_guild(invite_str):
     if invite == None:
         return quart.Response(error_bodys['not_found'], 404)
 
-    c = await members.find_one({'guild_id': invite['guild_id'], '_id': user['_id']})
+    c = await members.find_one({'guild_id': invite['guild_id'], 'id': user['_id']})
 
     if c != None:
         return quart.Response(error_bodys['already_in_guild'], 409)
 
     member = {
+        '_id': user['_id'],
         'user': user,
         'nick': None,
         'avatar_url': None,
@@ -293,7 +294,7 @@ async def create_invite(guild_id):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    c = await members.find_one({'guild_id': guild_id, '_id': user['_id']})
+    c = await members.find_one({'guild_id': guild_id, 'id': user['_id']})
 
     if c == None:
         return quart.Response(error_bodys['not_in_guild'], 403)

@@ -1,6 +1,5 @@
-import ulid
-from hashlib import sha256
+from hashlib import sha384
 
 
 def get_hash_for(password: str):
-    return sha256(password.encode()).hexdigest()
+    return sha384(password.encode()).hexdigest()

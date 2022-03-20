@@ -1,10 +1,10 @@
 import quart
 import json
-import ulid
 
 from ..permissions import Permissions
 from ..database import channels as channels_db, users, members, guilds, _messages
 from ..data_bodys import error_bodys
+from ..snowflakes import snowflake
 from ...gateway import dispatch_event
 
 app = quart.current_app
@@ -24,7 +24,7 @@ async def create_channel(guild_id: int):
     if let is False:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one({'_id': ver['_id']})
+    member = await members.find_one({'id': ver['_id']})
 
     if member == None:
         return quart.Response(error_bodys['not_in_guild'], 403)
@@ -50,7 +50,7 @@ async def create_channel(guild_id: int):
 
     try:
         data = {
-            '_id': ulid.new().str,
+            '_id': snowflake(),
             'name': d['name'].lower(),
             'description': d.get('description', ''),
             'guild_id': guild_id,
@@ -80,7 +80,7 @@ async def edit_channel(channel_id: int):
         if session_id == auth:
             let = True
 
-    as_member = await members.find_one({'_id': ver['_id']})
+    as_member = await members.find_one({'id': ver['_id']})
     channel = channels_db.find_one({'_id': channel_id})
 
     if as_member == None:
@@ -154,10 +154,10 @@ async def delete_channel(channel_id: int):
     if channel == None:
         return quart.Response(error_bodys['not_found'], 404)
 
-    if await members.find_one({'_id': ver['_id'], 'guild_id': channel['guild_id']}) == None:
+    if await members.find_one({'id': ver['_id'], 'guild_id': channel['guild_id']}) == None:
         let = False
 
-    member_obj = await members.find_one({'_id': ver['_id'], 'guild_id': channel['guild_id']})
+    member_obj = await members.find_one({'id': ver['_id'], 'guild_id': channel['guild_id']})
 
     let = False
 

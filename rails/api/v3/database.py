@@ -72,15 +72,13 @@ async def send_message(channel_id: str, data: dict):
     await col.insert_one(data)
 
 async def get_message(channel_id: str, message_id: str):
-    c: motor.AgnosticCursor = await channels.find({'_id': channel_id})
+    c: motor.AgnosticCursor = channels.find_one({'_id': channel_id})
 
-    cc = await c.to_list(1)
-
-    if cc == []:
+    if c == None:
         return None
 
     col: motor.AgnosticCollection = _messages.get_collection(channel_id)
-    
+
     return await col.find_one({'channel_id': channel_id, '_id': message_id})
 
 async def edit_message(channel_id: str, message_id: str, data: dict):

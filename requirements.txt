@@ -6,4 +6,4 @@ hypercorn
 Flask-Limiter
 websockets
 motor==2.5.1
-ulid-py
+snowflake.py

@@ -1,7 +1,8 @@
 import json
-import ulid
 import datetime
 from quart import Blueprint, Response, request
+
+from ..snowflakes import snowflake
 from ..database import channels, users, send_message, get_message as find_message, members, guilds, delete_message as remove_message, edit_message as message_edit
 from ..data_bodys import error_bodys as err
 from ..permissions import Permissions
@@ -86,12 +87,12 @@ async def create_message(channel_id):
     if channel == None:
         return Response(err['not_found'], 404)
 
-    member = members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
+    member = await members.find_one({'id': user['_id'], 'guild_id': channel['guild_id']})
 
     if member == None:
         return Response(err['not_found'], 404)
 
-    guild = members.find_one({'_id': channel['guild_id']})
+    guild = await guilds.find_one({'_id': channel['guild_id']})
 
     if member['roles'] == []:
         v = guild['default_permission']
@@ -100,16 +101,23 @@ async def create_message(channel_id):
 
     p = Permissions(v)
 
-    if not p.send_messages:
+    if not p.send_messages and not member['owner']:
         return Response(err['no_perms'], 403)
 
     d: dict = await request.get_json()
 
     member['user'].pop('session_ids')
+    member['user'].pop('email')
+    member['user'].pop('password')
+    member['user'].pop('email_verified')
+    member['user'].pop('blocked_users')
+    member.pop('_id')
+    member['_id'] = member['id']
+    member.pop('id')
     member.pop('guild_id')
 
     data = {
-        '_id': ulid.new().str,
+        '_id': snowflake(),
         'author': member,
         'content': '',
         'tts': False,
@@ -214,12 +222,12 @@ async def get_message(channel_id, message_id):
     if channel == None:
         return Response(err['not_found'], 404)
 
-    member = members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
+    member = await members.find_one({'id': user['_id'], 'guild_id': channel['guild_id']})
 
     if member == None:
         return Response(err['not_found'], 404)
 
-    guild = members.find_one({'_id': channel['guild_id']})
+    guild = await members.find_one({'id': channel['guild_id']})
 
     if member['roles'] == []:
         v = guild['default_permission']
@@ -241,6 +249,9 @@ async def get_message(channel_id, message_id):
             else:
                 gtg = False
 
+    if member['owner']:
+        gtg = True
+
     if gtg is False:
         return Response(err['no_perms'], 403)
 
@@ -259,17 +270,17 @@ async def delete_message(channel_id, message_id):
     if user == None:
         return Response(err['no_auth'], 401)
 
-    channel = channels.find_one({'_id': channel_id})
+    channel = await channels.find_one({'_id': channel_id})
 
     if channel == None:
         return Response(err['not_found'], 404)
 
-    member = await members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
+    member = await members.find_one({'id': user['_id'], 'guild_id': channel['guild_id']})
 
     if member == None:
         return Response(err['no_perms'], 403)
 
-    message = await find_message(channel['id'], message_id)
+    message = await find_message(channel['_id'], message_id)
 
     if message == None:
         return Response(err['not_found'], 404)
@@ -289,11 +300,11 @@ async def delete_message(channel_id, message_id):
             if _p.manage_messages:
                 bypassed = True
 
-    if not p.manage_messages and not bypassed:
+    if not p.manage_messages and not bypassed and not member['owner']:
         return Response(err['no_perms'], 403)
 
     # TODO: Audit Log?
-    await remove_message(channel['id'], message['id'])
+    await remove_message(channel['_id'], message['_id'])
     await guild_dispatch(channel['guild_id'], 'MESSAGE_DELETE', message)
 
     return Response(json.dumps(message))

@@ -1,13 +1,12 @@
 import json
 import quart
-import re
-import ulid
 import datetime
 from ..data_bodys import error_bodys
 from ..database import users, user_settings
 from ..encrypt import get_hash_for
 from ..checks import check_session_
 from ..rate import rater
+from ..snowflakes import snowflake, hash_from
 
 users_me = quart.Blueprint('users_me-v3', __name__)
 
@@ -28,7 +27,7 @@ async def create_user():
     if isinstance(em, dict):
         return quart.Response(error_bodys['invalid_data'], status=400)
 
-    _id = ulid.new().str
+    _id = snowflake()
 
     try:
         given = {
@@ -43,10 +42,14 @@ async def create_user():
             'password': get_hash_for(d.pop('password')),
             'system': False,
             'email_verified': False,
-            'session_ids': [ulid.new().hex],
+            'session_ids': [hash_from()],
             'blocked_users': [],
             'bot': False,
-            'created_at': datetime.datetime.now(datetime.timezone.utc).isoformat()
+            'created_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            'db_settings': {
+                'accept': True,
+                'friend_bypass': False
+            }
         }
     except KeyError:
         print('e')
@@ -220,7 +223,7 @@ async def create_session():
     if u['bot']:
         return quart.Response(error_bodys['no_perms'], 401)
 
-    session_id = ulid.new().hex
+    session_id = hash_from()
 
     await users.find_one_and_update(
         {
@@ -249,8 +252,8 @@ async def delete_session(session_id: int):
     if u['bot']:
         if len(u['session_ids']) == 1:
             return quart.Response(error_bodys['no_perms'], 403)
-        
-        id = ulid.new().hex
+
+        id = get_hash_for(hash_from())
         return quart.Response(json.dumps({'token': id}), 201)
 
     await users.delete_one({'session_ids': [session_id]})
