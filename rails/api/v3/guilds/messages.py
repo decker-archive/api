@@ -87,6 +87,9 @@ async def create_message(channel_id):
     if channel == None:
         return Response(err['not_found'], 404)
 
+    if channel['type'] == 1:
+        return Response(err['invalid_data'], 400)
+
     member = await members.find_one({'id': user['_id'], 'guild_id': channel['guild_id']})
 
     if member == None:

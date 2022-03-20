@@ -94,6 +94,7 @@ async def delete_message(channel_id: str, message_id: str):
 async def _init_indexes():
     # guild-specific
 
+    await members.create_index('id')
     await members.create_index('joined_at')
     await members.create_index('owner')
     await members.create_index('roles')
