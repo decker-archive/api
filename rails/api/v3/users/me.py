@@ -46,7 +46,11 @@ async def create_user():
             'session_ids': [ulid.new().hex],
             'blocked_users': [],
             'bot': False,
-            'created_at': datetime.datetime.now(datetime.timezone.utc).isoformat()
+            'created_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            'db_settings': {
+                'accept': True,
+                'friend_bypass': False
+            }
         }
     except KeyError:
         print('e')

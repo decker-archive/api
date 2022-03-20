@@ -86,12 +86,12 @@ async def create_message(channel_id):
     if channel == None:
         return Response(err['not_found'], 404)
 
-    member = members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
+    member = await members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
 
     if member == None:
         return Response(err['not_found'], 404)
 
-    guild = members.find_one({'_id': channel['guild_id']})
+    guild = await members.find_one({'_id': channel['guild_id']})
 
     if member['roles'] == []:
         v = guild['default_permission']
@@ -183,12 +183,12 @@ async def get_message(channel_id, message_id):
     if channel == None:
         return Response(err['not_found'], 404)
 
-    member = members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
+    member = await members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
 
     if member == None:
         return Response(err['not_found'], 404)
 
-    guild = members.find_one({'_id': channel['guild_id']})
+    guild = await members.find_one({'_id': channel['guild_id']})
 
     if member['roles'] == []:
         v = guild['default_permission']
@@ -229,7 +229,7 @@ async def delete_message(channel_id, message_id):
     if user == None:
         return Response(err['no_auth'], 401)
 
-    channel = channels.find_one({'_id': channel_id})
+    channel = await channels.find_one({'_id': channel_id})
 
     if channel == None:
         return Response(err['not_found'], 404)
