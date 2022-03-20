@@ -78,7 +78,7 @@ async def get_message(channel_id: str, message_id: str):
         return None
 
     col: motor.AgnosticCollection = _messages.get_collection(channel_id)
-    
+
     return await col.find_one({'channel_id': channel_id, '_id': message_id})
 
 async def edit_message(channel_id: str, message_id: str, data: dict):

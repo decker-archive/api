@@ -14,7 +14,7 @@ def get_key_func():
     try:
         compat = request.method + ':' + request.endpoint + ':' + request.remote_addr
     except:
-        abort(404)
+        return gen_code()
     for k, v in keys.items():
         if k == compat:
             return v

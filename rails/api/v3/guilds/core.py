@@ -81,7 +81,7 @@ async def create_guild():
         'pinned_messages': []
     }
     first_joined = {
-        '_id': owner['_id'],
+        'id': owner['_id'],
         'user': owner,
         'nick': None,
         'avatar_url': None,
@@ -108,7 +108,7 @@ async def edit_guild(guild_id: int):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one(user['_id'])
+    member = await members.find_one(user['id'])
 
     if member == None:
         return quart.Response(error_bodys['no_auth'], 401)
@@ -159,7 +159,7 @@ async def delete_guild(guild_id: int):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one(user['_id'])
+    member = await members.find_one(user['id'])
 
     if member == None:
         return quart.Response(error_bodys['no_auth'], 401)
@@ -187,7 +187,7 @@ async def get_guild(guild_id):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    member = await members.find_one(user['_id'])
+    member = await members.find_one(user['id'])
 
     if member == None:
         return quart.Response(error_bodys['no_auth'], 401)
@@ -234,7 +234,7 @@ async def join_guild(invite_str):
     if invite == None:
         return quart.Response(error_bodys['not_found'], 404)
 
-    c = await members.find_one({'guild_id': invite['guild_id'], '_id': user['_id']})
+    c = await members.find_one({'guild_id': invite['guild_id'], 'id': user['_id']})
 
     if c != None:
         return quart.Response(error_bodys['already_in_guild'], 409)
@@ -294,7 +294,7 @@ async def create_invite(guild_id):
     if user == None:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    c = await members.find_one({'guild_id': guild_id, '_id': user['_id']})
+    c = await members.find_one({'guild_id': guild_id, 'id': user['_id']})
 
     if c == None:
         return quart.Response(error_bodys['not_in_guild'], 403)
