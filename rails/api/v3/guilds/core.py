@@ -313,7 +313,7 @@ async def create_invite(guild_id):
     if p.create_invites is True:
         allow = True
 
-    if allow is False:
+    if allow is False and c['owner'] is False:
         return quart.Response(error_bodys['no_auth'], 401)
 
     code = await invite_code()
