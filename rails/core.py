@@ -6,7 +6,7 @@ import hypercorn.asyncio
 import hypercorn.config
 import quart.flask_patch # type: ignore
 
-from quart import Quart, Response
+from quart import Quart, Response, request
 
 from .api.gateway import connect
 
@@ -16,6 +16,7 @@ from .api.v3.rate import rater as rater3, _reset as _reset3
 from .api.v3.ui import friends as friends3
 from .api.v3.database import loop, _init_indexes
 from .api.v3.applications import bots as bots3
+from .api.v3.errors import Error
 
 
 app = Quart(__name__)
@@ -44,12 +45,16 @@ async def internal(*_):
 async def ratelimited(*_):
     return json.dumps({'message': '429: Too Many Requests', 'retry_after': rater3.current_limit.reset_at})
 
+@app.errorhandler(Error)
+async def handle_errors(err: Error):
+    return err._to_json()
+
 @app.after_request
 async def set_ratelimit(resp: Response):
+    print(f'DEBUG:api:Responded to {request.remote_addr} with {(await resp.get_data())}')
     if rater3.current_limit:
         resp.headers.add('X-RateLimit-Limit', rater3.current_limit.limit)
         resp.headers.add('X-RateLimit-Remaining', rater3.current_limit.remaining)
-        resp.headers.add('X-RateLimit-Breached', str(rater3.current_limit.breached))
         resp.headers.add('X-RateLimit-Bucket', rater3._key_func())
         resp.headers.add('X-RateLimit-Reset-After', rater3.current_limit.reset_at)
     resp.headers['Content-Type'] = 'application/json'

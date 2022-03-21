@@ -1,12 +1,13 @@
 import quart
-from .database import users, members, user_agent_tracking
+from .database import users, user_agent_tracking
+from .errors import Unauthorized
 
 
 async def check_session_(session_id):
     user = await users.find_one({'session_ids': [session_id]})
 
     if user == None:
-        return None
+        raise Unauthorized('Invalid Authorization')
     else:
         return user
 

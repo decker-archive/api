@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from ..checks import check_session_
 from ..data_bodys import error_bodys
 from ..database import guilds as guilds_db, channels, members, guild_invites
-from ..snowflakes import invite_code, snowflake
+from ..snowflakes import code, snowflake
 from ...gateway import dispatch_event_to, guild_dispatch
 from ..permissions import Permissions
 
@@ -316,12 +316,12 @@ async def create_invite(guild_id):
     if allow is False and c['owner'] is False:
         return quart.Response(error_bodys['no_auth'], 401)
 
-    code = await invite_code()
+    code_ = await code()
 
-    await guild_invites.insert_one({'guild_id': guild_id, 'code': code})
+    await guild_invites.insert_one({'guild_id': guild_id, 'code': code_})
 
     await guild_dispatch(
-        guild_id, 'INVITE_CREATE', {'code': code, 'guild_id': guild_id}
+        guild_id, 'INVITE_CREATE', {'code': code_, 'guild_id': guild_id}
     )
 
-    return quart.Response(json.dumps({'code': code}), 201)
+    return quart.Response(json.dumps({'code': code_}), 201)

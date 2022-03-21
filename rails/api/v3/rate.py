@@ -5,7 +5,6 @@ import ulid
 from typing import Dict
 from quart import request, abort
 from dotenv import load_dotenv
-from .snowflakes import gen_code
 
 load_dotenv()
 

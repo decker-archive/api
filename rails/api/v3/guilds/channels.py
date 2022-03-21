@@ -11,7 +11,7 @@ app = quart.current_app
 channels = quart.Blueprint('channels-v3', __name__)
 
 
-@channels.post('/<guild_id>/channels')
+@channels.post('/<guild_id>/channels/create')
 async def create_channel(guild_id: int):
     auth = quart.request.headers.get('Authorization')
     ver = await users.find_one({'session_ids': [auth]})
@@ -70,7 +70,7 @@ async def create_channel(guild_id: int):
     await dispatch_event('channel_create', _d)
 
 
-@channels.get('/channels/<channel_id>')
+@channels.patch('/channels/<channel_id>')
 async def edit_channel(channel_id: int):
     auth = quart.request.headers.get('Authorization')
     ver = await users.find_one({'session_ids': [auth]})
