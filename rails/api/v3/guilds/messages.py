@@ -3,7 +3,7 @@ import datetime
 from quart import Blueprint, Response, request
 
 from ..snowflakes import snowflake
-from ..database import channels, users, send_message, get_message as find_message, members, guilds, delete_message as remove_message
+from ..database import channels, users, send_message, get_message as find_message, members, guilds, delete_message as remove_message, edit_message as message_edit
 from ..data_bodys import error_bodys as err
 from ..permissions import Permissions
 from ..data_bodys import mention, get_regexed_id
@@ -181,6 +181,37 @@ async def create_message(channel_id):
 
     return Response(json.dumps(data), 201)
 
+@msgs.patch('/<channel_id>/messages/<message_id>')
+async def edit_message(channel_id, message_id):
+    auth = request.headers.get('Authorization', '')
+    user = await users.find_one({'session_ids': [auth]})
+
+    if user == None:
+        return Response(err['no_auth'], 401)
+
+    channel = channels.find_one({'_id': channel_id})
+
+    if channel == None:
+        return Response(err['not_found'], 404)
+
+    member = await members.find_one({'_id': user['_id'], 'guild_id': channel['guild_id']})
+
+    if member == None:
+        return Response(err['no_perms'], 403)
+
+    message = await find_message(channel['id'], message_id)
+
+    if message == None:
+        return Response(err['not_found'], 404)
+
+    if message['author'] != member:
+        return Response(err['no_perms'], 403)
+
+    edited_ms = await message_edit(channel['id'], message['id'])
+    await guild_dispatch(channel['guild_id'], 'MESSAGE_EDIT', message)
+
+    return Response(json.dumps(edited_ms.raw_result))
+
 @msgs.get('/<channel_id>/messages/<message_id>')
 async def get_message(channel_id, message_id):
     auth = request.headers.get('Authorization', '')
@@ -233,7 +264,6 @@ async def get_message(channel_id, message_id):
         return Response(err['not_found'], 404)
 
     return Response(json.dumps(ms), 200)
-
 
 @msgs.delete('/<channel_id>/messages/<message_id>')
 async def delete_message(channel_id, message_id):
